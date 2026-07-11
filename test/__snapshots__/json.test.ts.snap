@@ -1,0 +1,99 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`--json output > golden snapshot (subagent session) 1`] = `
+"{
+  "schemaVersion": 1,
+  "pricingAsOf": "2026-07-11",
+  "session": {
+    "id": "434bccac-30fc-4b1c-bf3f-477c103af21a",
+    "source": "fixtures/subagent-session.jsonl",
+    "models": [
+      "claude-fable-5",
+      "claude-haiku-4-5-20251001"
+    ],
+    "startTime": "2026-01-24T12:34:01.671Z",
+    "endTime": "2026-07-11T07:45:13.551Z",
+    "requestCount": 19,
+    "skippedLines": 0,
+    "warnings": []
+  },
+  "totalUSD": 1.75132,
+  "tokens": {
+    "input": 4775,
+    "output": 2568,
+    "cacheRead": 686218,
+    "cacheWrite": 103060
+  },
+  "categories": {
+    "generationUSD": 0.127545,
+    "toolResultsUSD": 0.014032,
+    "fileReadsUSD": 0.000112,
+    "overheadUSD": 0.394799,
+    "cacheWritesUSD": 1.209865,
+    "compactionUSD": 0.004967
+  },
+  "compactionEvents": [
+    {
+      "timestamp": "2026-01-24T12:36:20.095Z",
+      "costUSD": 0.004967,
+      "droppedTokens": 2076,
+      "subagent": "agent-a5a949b"
+    }
+  ],
+  "cache": {
+    "hitRate": 0.864197,
+    "savedUSD": 3.636442,
+    "wastedUSD": 0.47202,
+    "invalidations": 1
+  },
+  "perModel": [
+    {
+      "model": "claude-fable-5",
+      "requests": 7,
+      "costUSD": 1.658687,
+      "input": 14,
+      "output": 2549,
+      "cacheRead": 372697,
+      "cacheWrite": 57920,
+      "pricedExactly": true
+    },
+    {
+      "model": "claude-haiku-4-5-20251001",
+      "requests": 12,
+      "costUSD": 0.092633,
+      "input": 4761,
+      "output": 19,
+      "cacheRead": 313521,
+      "cacheWrite": 45140,
+      "pricedExactly": true
+    }
+  ],
+  "serverToolUse": {
+    "webSearch": 0,
+    "webFetch": 0
+  },
+  "subagentUSD": 0.092633,
+  "topTurns": [
+    {
+      "startTime": "2026-07-11T07:44:11.419Z",
+      "costUSD": 1.484694,
+      "description": "Write ×2 + Read + Edit, +1 more tools, sub-agent ×1",
+      "outputTokens": 1807,
+      "inputGrowthTokens": 49922,
+      "hasCompaction": false,
+      "subagents": [
+        "agent-a5a949b"
+      ]
+    },
+    {
+      "startTime": "2026-07-11T07:41:34.589Z",
+      "costUSD": 0.266626,
+      "description": "Bash + Skill",
+      "outputTokens": 761,
+      "inputGrowthTokens": 25954,
+      "hasCompaction": false,
+      "subagents": []
+    }
+  ]
+}"
+`;

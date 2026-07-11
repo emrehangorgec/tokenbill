@@ -1,0 +1,4 @@
+{"type":"assistant","uuid":"c1","sessionId":"corrupt-test","timestamp":"2026-07-01T11:00:00.000Z","requestId":"req_c1","message":{"model":"claude-haiku-4-5-20251001","usage":{"input_tokens":50,"output_tokens":100,"cache_read_input_tokens":0,"cache_creation_input_tokens":0},"content":[{"type":"text","text":"ok"}]}}
+{this is not json at all
+{"type":"assistant","truncated":tru
+{"type":"assistant","uuid":"c2","sessionId":"corrupt-test","timestamp":"2026-07-01T11:00:10.000Z","requestId":"req_c2","message":{"model":"claude-haiku-4-5-20251001","usage":{"input_tokens":50,"output_tokens":100,"cache_read_input_tokens":0,"cache_creation_input_tokens":0},"content":[{"type":"text","text":"ok"}]}}
