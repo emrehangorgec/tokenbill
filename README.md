@@ -6,6 +6,8 @@ Claude Code sessions cost real money and you get zero visibility into why.
 `tokenbill` reads the session logs already on your disk and gives you the bill,
 itemized. No network calls, no config, no account.
 
+![tokenbill demo](assets/demo.svg)
+
 ```
 $ npx tokenbill
 
@@ -14,28 +16,18 @@ $ npx tokenbill
   TOTAL ESTIMATED COST                              $32.25
 
   Where it went
-  ───────────────────────────────────────────────────────────────
-  System prompt & overhead               █████      $21.04
-  Context compaction                     ██          $6.29
-  Model generation (output tokens)       █           $3.04
-  Cache writes (premium)                             $1.66
-  Tool results fed back                              $0.21
-  File reads (Read tool)                             $0.00
-  ───────────────────────────────────────────────────────────────
-  Context compacted at 10:40 - cost $6.29, dropped ~11 K tokens of history
+  ──────────────────────────────────────────────────────────────────
+  System prompt & overhead           ████████████████░░░░░░░░  65%   $21.04
+  Context compaction                 █████░░░░░░░░░░░░░░░░░░░  20%    $6.29
+  Model generation (output tokens)   ██░░░░░░░░░░░░░░░░░░░░░░   9%    $3.04
+  Cache writes (premium)             █░░░░░░░░░░░░░░░░░░░░░░░   5%    $1.66
+  ──────────────────────────────────────────────────────────────────
 
   Cache efficiency
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
   Cache hit rate: 98%  ·  saved ≈ $191 vs. uncached
   Wasted on cache re-writes after prefix breaks: $3.14 (1 rebuild)
-  ───────────────────────────────────────────────────────────────
-
-  Top 3 most expensive turns
-  ───────────────────────────────────────────────────────────────
-   $10.66  10:55  Edit ×10 + Bash ×10 + Write ×6 (31 K in / 25 K out)
-    $8.80  10:47  Write ×14 + Bash ×7 + ToolSearch, +2 more tools
-    $7.11  10:39  Write, context compacted (314 K in / 7 K out)
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
 ```
 
 *(Real output from a real session - yes, that half-hour cost $32 in API-equivalent terms, and $21 of it was re-reading the system prompt from cache on every request.)*
@@ -59,6 +51,7 @@ Options:
 --json            machine-readable output (schemaVersion 1)
 --top <n>         number of expensive turns to show (default 10)
 --pricing <file>  override the built-in price table with your own JSON
+--no-color        disable colored output (NO_COLOR env also respected)
 ```
 
 ## What it tells you
@@ -91,6 +84,7 @@ npm install
 npm test          # vitest: unit + golden-file snapshot tests
 npm run build     # tsc → dist/
 npm run dev       # tsx src/cli.ts
+npm run demo      # regenerate assets/demo.svg from fixtures/basic.jsonl
 ```
 
 Licensed under the [MIT License](LICENSE).

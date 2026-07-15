@@ -7,24 +7,24 @@ exports[`golden report snapshots > fixtures/basic.jsonl 1`] = `
   TOTAL ESTIMATED COST                              $1.66
 
   Where it went
-  ───────────────────────────────────────────────────────────────
-  Cache writes (premium)                 ██████      $1.16
-  System prompt & overhead               ██          $0.37
-  Model generation (output tokens)       █           $0.13
-  Tool results fed back                              $0.00
-  File reads (Read tool)                             $0.00
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
+  Cache writes (premium)             █████████████████░░░░░░░  70%    $1.16
+  System prompt & overhead           █████░░░░░░░░░░░░░░░░░░░  22%    $0.37
+  Model generation (output tokens)   ██░░░░░░░░░░░░░░░░░░░░░░   8%    $0.13
+  Tool results fed back              ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
+  File reads (Read tool)             ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
+  ──────────────────────────────────────────────────────────────────
 
   Top 2 most expensive turns
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
     $1.39  10:44  Write ×2 + Read + Edit, +1 more tools (50 K in / 2 K out)
     $0.27  10:41  Bash + Skill (26 K in / 761 out)
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
 
   Per model (7 API requests)
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
   claude-fable-5                   431 K in     3 K out     $1.66
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
   Tokens: 14 uncached in · 373 K cache read · 58 K cache write · 3 K out
 
   API-equivalent cost estimate · prices as of 2026-07-11 · subscription users pay flat fees
@@ -38,25 +38,25 @@ exports[`golden report snapshots > fixtures/compaction.jsonl 1`] = `
   TOTAL ESTIMATED COST                              $0.25
 
   Where it went
-  ───────────────────────────────────────────────────────────────
-  Cache writes (premium)                 ███         $0.10
-  System prompt & overhead               ██          $0.06
-  Context compaction                     ██          $0.06
-  Model generation (output tokens)       █           $0.03
-  File reads (Read tool)                             $0.00
-  Tool results fed back                              $0.00
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
+  Cache writes (premium)             █████████░░░░░░░░░░░░░░░  39%    $0.10
+  System prompt & overhead           ██████░░░░░░░░░░░░░░░░░░  24%    $0.06
+  Context compaction                 ██████░░░░░░░░░░░░░░░░░░  23%    $0.06
+  Model generation (output tokens)   ███░░░░░░░░░░░░░░░░░░░░░  14%    $0.03
+  File reads (Read tool)             ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
+  Tool results fed back              ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
+  ──────────────────────────────────────────────────────────────────
   Context compacted at 17:05 - cost $0.06, dropped ~172 K tokens of history
 
   Top 1 most expensive turns
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
     $0.25  17:00  Read, context compacted (189 K in / 2 K out)
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
 
   Per model (4 API requests)
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
   claude-sonnet-4-6                241 K in     2 K out     $0.25
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
   Tokens: 9 K uncached in · 197 K cache read · 35 K cache write · 2 K out
 
   API-equivalent cost estimate · prices as of 2026-07-11 · subscription users pay flat fees
@@ -70,23 +70,23 @@ exports[`golden report snapshots > fixtures/corrupt.jsonl 1`] = `
   TOTAL ESTIMATED COST                              $0.00
 
   Where it went
-  ───────────────────────────────────────────────────────────────
-  Model generation (output tokens)       ███████     $0.00
-  System prompt & overhead               █           $0.00
-  Tool results fed back                              $0.00
-  File reads (Read tool)                             $0.00
-  Cache writes (premium)                             $0.00
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
+  Model generation (output tokens)   ██████████████████████░░  91%    $0.00
+  System prompt & overhead           ██░░░░░░░░░░░░░░░░░░░░░░   9%    $0.00
+  Tool results fed back              ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
+  File reads (Read tool)             ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
+  Cache writes (premium)             ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
+  ──────────────────────────────────────────────────────────────────
 
   Top 1 most expensive turns
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
     $0.00  14:00  text response (50 in / 200 out)
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
 
   Per model (2 API requests)
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
   claude-haiku-4-5-20251001          100 in     200 out     $0.00
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
   Tokens: 100 uncached in · 0 cache read · 0 cache write · 200 out
   Skipped 2 malformed log line(s)
 
@@ -101,23 +101,23 @@ exports[`golden report snapshots > fixtures/multi-iteration.jsonl 1`] = `
   TOTAL ESTIMATED COST                              $0.01
 
   Where it went
-  ───────────────────────────────────────────────────────────────
-  Model generation (output tokens)       █████       $0.00
-  Cache writes (premium)                 ██          $0.00
-  System prompt & overhead               █           $0.00
-  Tool results fed back                              $0.00
-  File reads (Read tool)                             $0.00
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
+  Model generation (output tokens)   ███████████████░░░░░░░░░  62%    $0.00
+  Cache writes (premium)             ██████░░░░░░░░░░░░░░░░░░  26%    $0.00
+  System prompt & overhead           ███░░░░░░░░░░░░░░░░░░░░░  12%    $0.00
+  Tool results fed back              ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
+  File reads (Read tool)             ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
+  ──────────────────────────────────────────────────────────────────
 
   Top 1 most expensive turns
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
     $0.01  13:00  Read (2 K in / 300 out)
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
 
   Per model (1 API requests)
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
   claude-sonnet-4-6                  3 K in     300 out     $0.01
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
   Tokens: 100 uncached in · 2 K cache read · 500 cache write · 300 out
 
   API-equivalent cost estimate · prices as of 2026-07-11 · subscription users pay flat fees
@@ -131,27 +131,27 @@ exports[`golden report snapshots > fixtures/subagent-session.jsonl 1`] = `
   TOTAL ESTIMATED COST                              $1.75
 
   Where it went
-  ───────────────────────────────────────────────────────────────
-  Cache writes (premium)                 ██████      $1.21
-  System prompt & overhead               ██          $0.39
-  Model generation (output tokens)       █           $0.13
-  Tool results fed back                              $0.01
-  Context compaction                                 $0.00
-  File reads (Read tool)                             $0.00
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
+  Cache writes (premium)             █████████████████░░░░░░░  69%    $1.21
+  System prompt & overhead           █████░░░░░░░░░░░░░░░░░░░  23%    $0.39
+  Model generation (output tokens)   ██░░░░░░░░░░░░░░░░░░░░░░   7%    $0.13
+  Tool results fed back              ░░░░░░░░░░░░░░░░░░░░░░░░   1%    $0.01
+  Context compaction                 ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
+  File reads (Read tool)             ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
+  ──────────────────────────────────────────────────────────────────
   Context compacted at 15:36 - cost $0.00, dropped ~2 K tokens of history (sub-agent agent-a5a949b)
 
   Top 2 most expensive turns
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
     $1.48  10:44  Write ×2 + Read + Edit, +1 more tools, sub-agent ×1 (50 K in / 2 K out)
     $0.27  10:41  Bash + Skill (26 K in / 761 out)
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
 
   Per model (19 API requests)
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
   claude-fable-5                   431 K in     3 K out     $1.66
   claude-haiku-4-5-20251001        363 K in      19 out     $0.09
-  ───────────────────────────────────────────────────────────────
+  ──────────────────────────────────────────────────────────────────
   Tokens: 5 K uncached in · 686 K cache read · 103 K cache write · 3 K out
   Sub-agents: $0.09 of the total
 

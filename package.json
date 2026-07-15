@@ -1,6 +1,6 @@
 {
   "name": "tokenbill",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Where did my AI budget go? Token cost explainer for Claude Code sessions.",
   "type": "module",
   "bin": { "tokenbill": "dist/cli.js" },
@@ -9,7 +9,8 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
-    "dev": "tsx src/cli.ts"
+    "dev": "tsx src/cli.ts",
+    "demo": "tsx scripts/render-svg.ts"
   },
   "license": "MIT",
   "devDependencies": {

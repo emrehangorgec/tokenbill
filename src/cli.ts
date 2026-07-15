@@ -11,6 +11,7 @@ import { overridePricing } from "./cost/pricing.js";
 import { claudeProjectsRoot, resolveProjectLogDir } from "./project-dir.js";
 import { renderAggregateJson, renderJson } from "./report/json.js";
 import { renderAggregateReport, renderReport } from "./report/terminal.js";
+import { setColorEnabled } from "./report/theme.js";
 import { topTurns } from "./turns.js";
 
 const HELP = `Usage: tokenbill [options] [session-file.jsonl | project-dir]
@@ -26,6 +27,7 @@ Options:
   --json            machine-readable output
   --top <n>         number of expensive turns to show (default 10)
   --pricing <file>  JSON file overriding the built-in price table
+  --no-color        disable colored output (NO_COLOR env also respected)
   -h, --help        show this help`;
 
 function findSessionFiles(dir: string): string[] {
@@ -120,6 +122,8 @@ for (let i = 0; i < argv.length; i++) {
     process.exit(0);
   } else if (a === "--json") {
     json = true;
+  } else if (a === "--no-color") {
+    setColorEnabled(false);
   } else if (a === "--top") {
     top = Number(argv[++i]);
     if (!Number.isInteger(top) || top < 1) {
