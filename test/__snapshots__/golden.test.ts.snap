@@ -15,6 +15,20 @@ exports[`golden report snapshots > fixtures/basic.jsonl 1`] = `
   File reads (Read tool)             ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
   ──────────────────────────────────────────────────────────────────
 
+  Cache efficiency
+  ──────────────────────────────────────────────────────────────────
+  Cache hit rate: 87%  ·  saved ≈ $3.35 vs. uncached
+  Wasted on cache re-writes after prefix breaks: $0.47 (1 rebuild)
+  ──────────────────────────────────────────────────────────────────
+
+  Recommendations
+  ──────────────────────────────────────────────────────────────────
+  ⚠ 1 cache prefix break cost you ≈ $0.47
+    → usually mid-session config or system prompt changes; keep the prompt prefix stable
+  ✓ cache hit rate 87% - healthy
+  Potential savings this project: ≈ $0.47
+  ──────────────────────────────────────────────────────────────────
+
   Top 2 most expensive turns
   ──────────────────────────────────────────────────────────────────
     $1.39  10:44  Write ×2 + Read + Edit, +1 more tools (50 K in / 2 K out)
@@ -48,6 +62,20 @@ exports[`golden report snapshots > fixtures/compaction.jsonl 1`] = `
   ──────────────────────────────────────────────────────────────────
   Context compacted at 17:05 - cost $0.06, dropped ~172 K tokens of history
 
+  Cache efficiency
+  ──────────────────────────────────────────────────────────────────
+  Cache hit rate: 82%  ·  saved ≈ $0.53 vs. uncached
+  Wasted on cache re-writes after prefix breaks: $0.01 (1 rebuild)
+  ──────────────────────────────────────────────────────────────────
+
+  Recommendations
+  ──────────────────────────────────────────────────────────────────
+  ⚠ context compaction cost ≈ $0.06 (1 event)
+    → long sessions pay to re-summarize their own history; start fresh sessions per task
+  ✓ cache hit rate 82% - healthy
+  Potential savings this project: ≈ $0.06
+  ──────────────────────────────────────────────────────────────────
+
   Top 1 most expensive turns
   ──────────────────────────────────────────────────────────────────
     $0.25  17:00  Read, context compacted (189 K in / 2 K out)
@@ -76,6 +104,12 @@ exports[`golden report snapshots > fixtures/corrupt.jsonl 1`] = `
   Tool results fed back              ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
   File reads (Read tool)             ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
   Cache writes (premium)             ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
+  ──────────────────────────────────────────────────────────────────
+
+  Cache efficiency
+  ──────────────────────────────────────────────────────────────────
+  Cache hit rate: 0%  ·  saved ≈ $0.00 vs. uncached
+  No mid-session cache rebuilds detected
   ──────────────────────────────────────────────────────────────────
 
   Top 1 most expensive turns
@@ -109,6 +143,12 @@ exports[`golden report snapshots > fixtures/multi-iteration.jsonl 1`] = `
   File reads (Read tool)             ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
   ──────────────────────────────────────────────────────────────────
 
+  Cache efficiency
+  ──────────────────────────────────────────────────────────────────
+  Cache hit rate: 77%  ·  saved ≈ $0.01 vs. uncached
+  No mid-session cache rebuilds detected
+  ──────────────────────────────────────────────────────────────────
+
   Top 1 most expensive turns
   ──────────────────────────────────────────────────────────────────
     $0.01  13:00  Read (2 K in / 300 out)
@@ -140,6 +180,20 @@ exports[`golden report snapshots > fixtures/subagent-session.jsonl 1`] = `
   File reads (Read tool)             ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
   ──────────────────────────────────────────────────────────────────
   Context compacted at 15:36 - cost $0.00, dropped ~2 K tokens of history (sub-agent agent-a5a949b)
+
+  Cache efficiency
+  ──────────────────────────────────────────────────────────────────
+  Cache hit rate: 86%  ·  saved ≈ $3.64 vs. uncached
+  Wasted on cache re-writes after prefix breaks: $0.47 (1 rebuild)
+  ──────────────────────────────────────────────────────────────────
+
+  Recommendations
+  ──────────────────────────────────────────────────────────────────
+  ⚠ 1 cache prefix break cost you ≈ $0.47
+    → usually mid-session config or system prompt changes; keep the prompt prefix stable
+  ✓ cache hit rate 86% - healthy
+  Potential savings this project: ≈ $0.47
+  ──────────────────────────────────────────────────────────────────
 
   Top 2 most expensive turns
   ──────────────────────────────────────────────────────────────────

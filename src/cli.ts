@@ -8,7 +8,8 @@ import { attribute } from "./attribute.js";
 import { analyzeCache } from "./cost/cache.js";
 import { calculate } from "./cost/calculator.js";
 import { overridePricing } from "./cost/pricing.js";
-import { claudeProjectsRoot, resolveProjectLogDir } from "./project-dir.js";
+import { claudeProjectsRoot, encodeProjectPath, resolveProjectLogDir } from "./project-dir.js";
+import { renderAggregateHtml, renderHtml } from "./report/html.js";
 import { renderAggregateJson, renderJson } from "./report/json.js";
 import { renderAggregateReport, renderReport } from "./report/terminal.js";
 import { setColorEnabled } from "./report/theme.js";
@@ -25,6 +26,8 @@ A single .jsonl file gives the full detailed report for just that session.
 
 Options:
   --json            machine-readable output
+  --html [file]     write a shareable single-file HTML report
+                    (default: tokenbill-report.html)
   --top <n>         number of expensive turns to show (default 10)
   --pricing <file>  JSON file overriding the built-in price table
   --no-color        disable colored output (NO_COLOR env also respected)
@@ -112,6 +115,7 @@ function resolveTarget(arg: string | undefined): Target {
 // --- arg parsing -----------------------------------------------------------
 const argv = process.argv.slice(2);
 let json = false;
+let html: string | undefined;
 let top = 10;
 let target: string | undefined;
 
@@ -122,6 +126,9 @@ for (let i = 0; i < argv.length; i++) {
     process.exit(0);
   } else if (a === "--json") {
     json = true;
+  } else if (a === "--html") {
+    html =
+      argv[i + 1] && argv[i + 1].endsWith(".html") ? path.resolve(argv[++i]) : path.resolve("tokenbill-report.html");
   } else if (a === "--no-color") {
     setColorEnabled(false);
   } else if (a === "--top") {
@@ -150,6 +157,24 @@ for (let i = 0; i < argv.length; i++) {
   }
 }
 
+/**
+ * Mask the home directory in displayed labels so reports are shareable.
+ * Covers both the literal path and its encoded form inside a
+ * ~/.claude/projects/<encoded> folder name.
+ */
+function maskLabel(label: string): string {
+  const home = os.homedir();
+  let masked = label.startsWith(home) ? `~${label.slice(home.length)}` : label;
+  const encodedHome = encodeProjectPath(home);
+  while (masked.includes(encodedHome)) masked = masked.replace(encodedHome, "~");
+  return masked;
+}
+
+if (json && html) {
+  console.error("--json and --html are mutually exclusive");
+  process.exit(1);
+}
+
 const resolved = resolveTarget(target);
 
 if (resolved.mode === "single") {
@@ -158,17 +183,26 @@ if (resolved.mode === "single") {
   const attr = attribute(session);
   const turns = topTurns(session, top);
   const cache = analyzeCache(session);
-  console.log(
-    json
-      ? renderJson(session, cost, attr, turns, cache)
-      : renderReport(session, cost, attr, turns, cache),
-  );
+  if (html) {
+    fs.writeFileSync(html, renderHtml(session, cost, attr, turns, cache));
+    console.error(`Wrote ${html}`);
+  } else {
+    console.log(
+      json
+        ? renderJson(session, cost, attr, turns, cache)
+        : renderReport(session, cost, attr, turns, cache),
+    );
+  }
 } else {
   const sessions = resolved.files.map((f) => claudeCodeAdapter.parse(f));
   const result = aggregate(sessions, top);
-  console.log(
-    json
-      ? renderAggregateJson(result, resolved.label)
-      : renderAggregateReport(result, resolved.label, top),
-  );
+  const label = maskLabel(resolved.label);
+  if (html) {
+    fs.writeFileSync(html, renderAggregateHtml(result, label));
+    console.error(`Wrote ${html}`);
+  } else {
+    console.log(
+      json ? renderAggregateJson(result, label) : renderAggregateReport(result, label, top),
+    );
+  }
 }

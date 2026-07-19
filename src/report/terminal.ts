@@ -4,7 +4,9 @@ import type { Attribution } from "../attribute.js";
 import type { CacheAnalysis } from "../cost/cache.js";
 import type { CostBreakdown } from "../cost/calculator.js";
 import type { Turn } from "../turns.js";
+import { advise, type Advice } from "../advise.js";
 import { PRICING_AS_OF } from "../cost/pricing.js";
+import { dailyTrend } from "../trends.js";
 import { bold, dim, paint, palette } from "./theme.js";
 
 function usd(n: number): string {
@@ -105,6 +107,55 @@ function cacheLines(cache: CacheAnalysis): string[] {
   return lines;
 }
 
+function adviceLines(advice: Advice): string[] {
+  if (advice.findings.length === 0) return [];
+  const lines = [``, `  ${bold("Recommendations")}`, dim(`  ${RULE}`)];
+  for (const f of advice.findings) {
+    if (f.severity === "warn") {
+      lines.push(`  ${paint(palette.warn, "⚠")} ${f.title}`);
+    } else {
+      lines.push(`  ${paint(palette.good, "✓")} ${f.title}`);
+    }
+    if (f.detail) lines.push(dim(`    → ${f.detail}`));
+  }
+  if (advice.potentialSavingsUSD >= 0.05) {
+    lines.push(dim(`  Potential savings this project: ≈ ${usd(advice.potentialSavingsUSD)}`));
+  }
+  lines.push(dim(`  ${RULE}`));
+  return lines;
+}
+
+const SPARKS = "▁▂▃▄▅▆▇█";
+
+function trendLines(buckets: ReturnType<typeof dailyTrend>): string[] {
+  const activeDays = buckets.filter((b) => b.sessions > 0).length;
+  if (activeDays < 2) return [];
+  const max = Math.max(...buckets.map((b) => b.costUSD));
+  if (max <= 0) return [];
+  const total = buckets.reduce((s, b) => s + b.costUSD, 0);
+  const spark = buckets
+    .map((b) => SPARKS[Math.min(SPARKS.length - 1, Math.ceil((b.costUSD / max) * (SPARKS.length - 1)))])
+    .join("");
+  const lines = [``, `  ${bold(`Daily spend (last ${buckets.length} days)`)}`, dim(`  ${RULE}`)];
+  lines.push(`  ${paint(palette.brand, spark)}   total ${usd(total)}`);
+  for (const b of buckets) {
+    if (b.sessions === 0) continue;
+    const label = new Date(`${b.date}T00:00:00`).toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+    });
+    const frac = b.costUSD / max;
+    const fill = Math.max(1, Math.round(frac * 12));
+    const dayBar = paint(palette.brand, "█".repeat(fill)) + dim("░".repeat(12 - fill));
+    lines.push(
+      `  ${label.padEnd(7)} ${dayBar} ${usd(b.costUSD).padStart(8)} ` +
+        dim(`(${b.sessions} session${b.sessions === 1 ? "" : "s"})`),
+    );
+  }
+  lines.push(dim(`  ${RULE}`));
+  return lines;
+}
+
 function totalLines(totalUSD: number): string[] {
   return [
     `  ${bold("TOTAL ESTIMATED COST".padEnd(50))}${bold(paint(palette.brand, usd(totalUSD)))}`,
@@ -142,7 +193,19 @@ export function renderReport(
           (e.subagent ? dim(` (sub-agent ${e.subagent})`) : ""),
       );
     }
-    if (cache) lines.push(...cacheLines(cache));
+    if (cache) {
+      lines.push(...cacheLines(cache));
+      lines.push(
+        ...adviceLines(
+          advise({
+            totalUSD: cost.totalUSD,
+            categories: attr,
+            cache,
+            compactionEventCount: attr.compactionEvents.length,
+          }),
+        ),
+      );
+    }
     if (turns && turns.length > 0) lines.push(...turnLines(turns));
     lines.push("");
   }
@@ -217,6 +280,17 @@ export function renderAggregateReport(
     );
   }
   lines.push(...cacheLines(result.cache));
+  lines.push(
+    ...adviceLines(
+      advise({
+        totalUSD: result.totalUSD,
+        categories: result.categories,
+        cache: result.cache,
+        compactionEventCount: result.compactionEventCount,
+      }),
+    ),
+  );
+  lines.push(...trendLines(dailyTrend(result.sessions)));
 
   lines.push(...turnLines(result.topTurns, (t) => (t as AggregateTurn).sessionId.slice(0, 8)));
 

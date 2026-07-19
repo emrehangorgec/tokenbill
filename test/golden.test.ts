@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { claudeCodeAdapter } from "../src/adapters/claude-code.js";
 import { attribute } from "../src/attribute.js";
+import { analyzeCache } from "../src/cost/cache.js";
 import { calculate } from "../src/cost/calculator.js";
 import { renderReport } from "../src/report/terminal.js";
 import { topTurns } from "../src/turns.js";
@@ -19,7 +20,13 @@ describe("golden report snapshots", () => {
   for (const f of FIXTURES) {
     it(f, () => {
       const session = claudeCodeAdapter.parse(f);
-      const report = renderReport(session, calculate(session), attribute(session), topTurns(session));
+      const report = renderReport(
+        session,
+        calculate(session),
+        attribute(session),
+        topTurns(session),
+        analyzeCache(session),
+      );
       expect(report).toMatchSnapshot();
     });
   }

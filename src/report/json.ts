@@ -4,9 +4,23 @@ import type { Attribution } from "../attribute.js";
 import type { CacheAnalysis } from "../cost/cache.js";
 import type { CostBreakdown } from "../cost/calculator.js";
 import type { Turn } from "../turns.js";
+import { advise, type Advice } from "../advise.js";
 import { PRICING_AS_OF } from "../cost/pricing.js";
+import { dailyTrend } from "../trends.js";
 
 const round = (n: number) => Math.round(n * 1e6) / 1e6;
+
+function recommendationsJson(advice: Advice) {
+  return {
+    findings: advice.findings.map((f) => ({
+      severity: f.severity,
+      title: f.title,
+      detail: f.detail,
+      savingsUSD: f.savingsUSD === undefined ? undefined : round(f.savingsUSD),
+    })),
+    potentialSavingsUSD: round(advice.potentialSavingsUSD),
+  };
+}
 
 export function renderJson(
   session: NormalizedSession,
@@ -51,6 +65,14 @@ export function renderJson(
         wastedUSD: round(cache.wastedUSD),
         invalidations: cache.invalidations,
       },
+      recommendations: recommendationsJson(
+        advise({
+          totalUSD: cost.totalUSD,
+          categories: attr,
+          cache,
+          compactionEventCount: attr.compactionEvents.length,
+        }),
+      ),
       perModel: cost.perModel.map((m) => ({ ...m, costUSD: round(m.costUSD) })),
       serverToolUse: cost.serverToolUse,
       subagentUSD: round(cost.subagentUSD),
@@ -94,6 +116,15 @@ export function renderAggregateJson(result: AggregateResult, projectLabel: strin
         wastedUSD: round(result.cache.wastedUSD),
         invalidations: result.cache.invalidations,
       },
+      recommendations: recommendationsJson(
+        advise({
+          totalUSD: result.totalUSD,
+          categories: result.categories,
+          cache: result.cache,
+          compactionEventCount: result.compactionEventCount,
+        }),
+      ),
+      dailyTrend: dailyTrend(result.sessions).map((b) => ({ ...b, costUSD: round(b.costUSD) })),
       perModel: result.perModel.map((m) => ({ ...m, costUSD: round(m.costUSD) })),
       sessions: result.sessions.map((s) => ({ ...s, costUSD: round(s.costUSD) })),
       topTurns: result.topTurns.map((t) => ({

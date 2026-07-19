@@ -1,0 +1,77 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`html report > golden snapshot (basic session) 1`] = `
+"<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tokenbill report</title>
+<style>
+  body{margin:0;background:#0d1117;color:#d4d4d4;font:14px/1.5 'Cascadia Code','SF Mono',Consolas,Menlo,monospace}
+  main{max-width:900px;margin:0 auto;padding:32px 20px 48px}
+  h1{font-size:20px;margin:0}
+  h1 .brand{color:#00d7ff}
+  h2{font-size:14px;margin:0 0 10px;color:#d4d4d4}
+  .dim{color:#6e7681}
+  .total{font-size:34px;font-weight:bold;color:#00d7ff;margin:14px 0 4px}
+  section{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:16px 18px;margin-top:16px}
+  .catrow{display:flex;align-items:center;gap:10px;margin:5px 0}
+  .catlabel{flex:0 0 260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cattrack{flex:1;height:12px;background:#21262d;border-radius:6px;overflow:hidden}
+  .catfill{display:block;height:100%}
+  .catpct{flex:0 0 42px;text-align:right;color:#6e7681}
+  .catusd{flex:0 0 76px;text-align:right}
+  p{margin:6px 0}
+  .finding{margin:6px 0}
+  .finddetail{margin-left:22px}
+  .trend{display:flex;align-items:flex-end;gap:6px;padding-top:8px}
+  .daycol{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:0}
+  .daybar{width:100%;max-width:42px;border-radius:3px 3px 0 0}
+  .daylabel{font-size:11px;color:#6e7681}
+  .dayusd{font-size:11px;min-height:16px}
+  table{width:100%;border-collapse:collapse;margin-top:4px}
+  th,td{text-align:left;padding:5px 10px 5px 0;border-bottom:1px solid #21262d;vertical-align:top}
+  th{color:#6e7681;font-weight:normal}
+  .sortable th{cursor:pointer;user-select:none}
+  .sortable th:hover{color:#d4d4d4}
+  footer{margin-top:20px;color:#6e7681;font-size:12px}
+  @media (max-width:640px){.catlabel{flex-basis:140px}}
+</style>
+</head>
+<body>
+<main>
+<h1><span class="brand">tokenbill</span> <span class="dim">session 434bccac · 4m · claude-fable-5</span></h1>
+<div class="total">$1.66</div>
+<div class="dim">TOTAL ESTIMATED COST</div>
+<section><h2>Where it went</h2><div class="catrow"><span class="catlabel" style="color:#d7af5f">Cache writes (premium)</span><span class="cattrack"><span class="catfill" style="width:69.8%;background:#d7af5f"></span></span><span class="catpct">70%</span><span class="catusd">$1.16</span></div><div class="catrow"><span class="catlabel" style="color:#8a8a8a">System prompt &amp; overhead</span><span class="cattrack"><span class="catfill" style="width:22.3%;background:#8a8a8a"></span></span><span class="catpct">22%</span><span class="catusd">$0.37</span></div><div class="catrow"><span class="catlabel" style="color:#d75fd7">Model generation (output tokens)</span><span class="cattrack"><span class="catfill" style="width:7.7%;background:#d75fd7"></span></span><span class="catpct">8%</span><span class="catusd">$0.13</span></div><div class="catrow"><span class="catlabel" style="color:#5fafff">Tool results fed back</span><span class="cattrack"><span class="catfill" style="width:0.2%;background:#5fafff"></span></span><span class="catpct">0%</span><span class="catusd">$0.00</span></div><div class="catrow"><span class="catlabel" style="color:#5fd7d7">File reads (Read tool)</span><span class="cattrack"><span class="catfill" style="width:0.0%;background:#5fd7d7"></span></span><span class="catpct">0%</span><span class="catusd">$0.00</span></div></section>
+<section><h2>Cache efficiency</h2><p>Cache hit rate: <b style="color:#5fd787">87%</b> &middot; saved &asymp; <b style="color:#5fd787">$3.35</b> vs. uncached</p><p>Wasted on cache re-writes after prefix breaks: <b style="color:#ff5f5f">$0.47</b> <span class="dim">(1 rebuild)</span></p></section>
+<section><h2>Recommendations</h2><div class="finding"><span style="color:#ffaf00">&#9888;</span> 1 cache prefix break cost you ≈ $0.47<div class="dim finddetail">&rarr; usually mid-session config or system prompt changes; keep the prompt prefix stable</div></div><div class="finding"><span style="color:#5fd787">&#10003;</span> cache hit rate 87% - healthy</div><p class="dim">Potential savings this project: &asymp; $0.47</p></section>
+<section><h2>Top 2 most expensive turns</h2><table class="sortable"><thead><tr><th data-kind="num" onclick="st(this,0)">Cost</th><th data-kind="str" onclick="st(this,1)">Time</th><th data-kind="str" onclick="st(this,2)">What happened</th><th data-kind="num" onclick="st(this,3)">In</th><th data-kind="num" onclick="st(this,4)">Out</th></tr></thead><tbody><tr><td><b data-v="1.3920610000000002">$1.39</b></td><td>10:44</td><td>Write ×2 + Read + Edit, +1 more tools</td><td><span class="dim" data-v="49922">50 K</span></td><td><span class="dim" data-v="1788">2 K</span></td></tr><tr><td><b data-v="0.26662600000000003">$0.27</b></td><td>10:41</td><td>Bash + Skill</td><td><span class="dim" data-v="25954">26 K</span></td><td><span class="dim" data-v="761">761</span></td></tr></tbody></table></section>
+<section><h2>Per model</h2><table><thead><tr><th>Model</th><th>In</th><th>Out</th><th>Cost</th></tr></thead><tbody><tr><td>claude-fable-5</td><td><span data-v="430631">431 K</span></td><td><span data-v="2549">3 K</span></td><td><b data-v="1.6586870000000002">$1.66</b></td></tr></tbody></table></section>
+<footer>API-equivalent cost estimate &middot; prices as of 2026-07-11 &middot; subscription users pay flat fees</footer>
+</main>
+<script>
+function st(th,i){
+  var t=th.closest('table'),tb=t.tBodies[0],rows=[].slice.call(tb.rows);
+  var num=th.dataset.kind==='num';
+  var dir=th.dataset.dir==='asc'?'desc':'asc';
+  [].forEach.call(t.tHead.rows[0].cells,function(c){delete c.dataset.dir});
+  th.dataset.dir=dir;
+  rows.sort(function(a,b){
+    var av=cell(a,i,num),bv=cell(b,i,num);
+    var r=num?av-bv:String(av).localeCompare(String(bv));
+    return dir==='asc'?r:-r;
+  });
+  rows.forEach(function(r){tb.appendChild(r)});
+}
+function cell(row,i,num){
+  var td=row.cells[i],el=td.querySelector('[data-v]');
+  if(num) return parseFloat(el?el.dataset.v:td.textContent.replace(/[^0-9.\\-]/g,''))||0;
+  return td.textContent.trim();
+}
+</script>
+</body>
+</html>
+"
+`;

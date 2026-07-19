@@ -28,6 +28,14 @@ $ npx tokenbill
   Cache hit rate: 98%  ·  saved ≈ $191 vs. uncached
   Wasted on cache re-writes after prefix breaks: $3.14 (1 rebuild)
   ──────────────────────────────────────────────────────────────────
+
+  Recommendations
+  ──────────────────────────────────────────────────────────────────
+  ⚠ 1 cache prefix break cost you ≈ $3.14
+    → usually mid-session config or system prompt changes; keep the prompt prefix stable
+  ✓ cache hit rate 98% - healthy
+  Potential savings this project: ≈ $3.14
+  ──────────────────────────────────────────────────────────────────
 ```
 
 *(Real output from a real session - yes, that half-hour cost $32 in API-equivalent terms, and $21 of it was re-reading the system prompt from cache on every request.)*
@@ -49,6 +57,7 @@ Options:
 
 ```
 --json            machine-readable output (schemaVersion 1)
+--html [file]     shareable single-file HTML report (default: tokenbill-report.html)
 --top <n>         number of expensive turns to show (default 10)
 --pricing <file>  override the built-in price table with your own JSON
 --no-color        disable colored output (NO_COLOR env also respected)
@@ -61,6 +70,9 @@ Options:
 - **Compaction events** - when your context got summarized mid-session, what it cost, and how many tokens of history were dropped.
 - **Cache efficiency** - hit rate, dollars saved vs. running uncached, and dollars wasted on mid-session cache rebuilds (the signature of a broken prompt prefix).
 - **Top expensive turns** - the moments that actually burned the budget, each with a one-line description of what happened.
+- **Recommendations** - actionable findings with dollar impact: cache prefix breaks, file-read-heavy sessions, expensive compactions, low hit rates, plus an honest "potential savings" estimate.
+- **Daily spend trend** - a sparkline and per-day breakdown of the last 14 days (project reports), so you can see spend habits over time.
+- **Shareable HTML report** - `--html` writes the whole report as one self-contained dark-theme HTML file (no external requests, sortable turn table) you can open, screenshot, or send to your team.
 
 ## Honest caveats
 

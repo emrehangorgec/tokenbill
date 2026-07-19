@@ -46,6 +46,21 @@ exports[`--json output > golden snapshot (subagent session) 1`] = `
     "wastedUSD": 0.47202,
     "invalidations": 1
   },
+  "recommendations": {
+    "findings": [
+      {
+        "severity": "warn",
+        "title": "1 cache prefix break cost you ≈ $0.47",
+        "detail": "usually mid-session config or system prompt changes; keep the prompt prefix stable",
+        "savingsUSD": 0.47202
+      },
+      {
+        "severity": "ok",
+        "title": "cache hit rate 86% - healthy"
+      }
+    ],
+    "potentialSavingsUSD": 0.47202
+  },
   "perModel": [
     {
       "model": "claude-fable-5",
