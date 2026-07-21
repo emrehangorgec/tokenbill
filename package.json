@@ -6,11 +6,18 @@
   "bin": { "tokenbill": "dist/cli.js" },
   "main": "dist/cli.js",
   "files": ["dist"],
+  "repository": { "type": "git", "url": "git+https://github.com/emrehangorgec/tokenbill.git" },
+  "bugs": { "url": "https://github.com/emrehangorgec/tokenbill/issues" },
+  "homepage": "https://github.com/emrehangorgec/tokenbill#readme",
+  "keywords": ["claude-code", "claude", "cli", "token-cost", "ai-cost", "llm-cost"],
+  "engines": { "node": ">=18" },
+  "author": "Emrehan Görgeç",
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
     "dev": "tsx src/cli.ts",
-    "demo": "tsx scripts/render-svg.ts"
+    "demo": "tsx scripts/render-svg.ts",
+    "prepublishOnly": "npm run build && npm test"
   },
   "license": "MIT",
   "devDependencies": {

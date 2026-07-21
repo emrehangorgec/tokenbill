@@ -99,4 +99,6 @@ npm run dev       # tsx src/cli.ts
 npm run demo      # regenerate assets/demo.svg from fixtures/basic.jsonl
 ```
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for adapter contribution and pricing update guidelines.
+
 Licensed under the [MIT License](LICENSE).

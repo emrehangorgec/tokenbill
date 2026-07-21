@@ -175,34 +175,39 @@ if (json && html) {
   process.exit(1);
 }
 
-const resolved = resolveTarget(target);
+try {
+  const resolved = resolveTarget(target);
 
-if (resolved.mode === "single") {
-  const session = claudeCodeAdapter.parse(resolved.file);
-  const cost = calculate(session);
-  const attr = attribute(session);
-  const turns = topTurns(session, top);
-  const cache = analyzeCache(session);
-  if (html) {
-    fs.writeFileSync(html, renderHtml(session, cost, attr, turns, cache));
-    console.error(`Wrote ${html}`);
+  if (resolved.mode === "single") {
+    const session = claudeCodeAdapter.parse(resolved.file);
+    const cost = calculate(session);
+    const attr = attribute(session);
+    const turns = topTurns(session, top);
+    const cache = analyzeCache(session);
+    if (html) {
+      fs.writeFileSync(html, renderHtml(session, cost, attr, turns, cache));
+      console.error(`Wrote ${html}`);
+    } else {
+      console.log(
+        json
+          ? renderJson(session, cost, attr, turns, cache)
+          : renderReport(session, cost, attr, turns, cache),
+      );
+    }
   } else {
-    console.log(
-      json
-        ? renderJson(session, cost, attr, turns, cache)
-        : renderReport(session, cost, attr, turns, cache),
-    );
+    const sessions = resolved.files.map((f) => claudeCodeAdapter.parse(f));
+    const result = aggregate(sessions, top);
+    const label = maskLabel(resolved.label);
+    if (html) {
+      fs.writeFileSync(html, renderAggregateHtml(result, label));
+      console.error(`Wrote ${html}`);
+    } else {
+      console.log(
+        json ? renderAggregateJson(result, label) : renderAggregateReport(result, label, top),
+      );
+    }
   }
-} else {
-  const sessions = resolved.files.map((f) => claudeCodeAdapter.parse(f));
-  const result = aggregate(sessions, top);
-  const label = maskLabel(resolved.label);
-  if (html) {
-    fs.writeFileSync(html, renderAggregateHtml(result, label));
-    console.error(`Wrote ${html}`);
-  } else {
-    console.log(
-      json ? renderAggregateJson(result, label) : renderAggregateReport(result, label, top),
-    );
-  }
+} catch (e) {
+  console.error(`tokenbill: ${(e as Error).message}`);
+  process.exit(1);
 }

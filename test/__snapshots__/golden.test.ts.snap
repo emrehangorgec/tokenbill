@@ -31,8 +31,8 @@ exports[`golden report snapshots > fixtures/basic.jsonl 1`] = `
 
   Top 2 most expensive turns
   ──────────────────────────────────────────────────────────────────
-    $1.39  10:44  Write ×2 + Read + Edit, +1 more tools (50 K in / 2 K out)
-    $0.27  10:41  Bash + Skill (26 K in / 761 out)
+    $1.39  07:44  Write ×2 + Read + Edit, +1 more tools (50 K in / 2 K out)
+    $0.27  07:41  Bash + Skill (26 K in / 761 out)
   ──────────────────────────────────────────────────────────────────
 
   Per model (7 API requests)
@@ -60,7 +60,7 @@ exports[`golden report snapshots > fixtures/compaction.jsonl 1`] = `
   File reads (Read tool)             ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
   Tool results fed back              ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
   ──────────────────────────────────────────────────────────────────
-  Context compacted at 17:05 - cost $0.06, dropped ~172 K tokens of history
+  Context compacted at 14:05 - cost $0.06, dropped ~172 K tokens of history
 
   Cache efficiency
   ──────────────────────────────────────────────────────────────────
@@ -78,7 +78,7 @@ exports[`golden report snapshots > fixtures/compaction.jsonl 1`] = `
 
   Top 1 most expensive turns
   ──────────────────────────────────────────────────────────────────
-    $0.25  17:00  Read, context compacted (189 K in / 2 K out)
+    $0.25  14:00  Read, context compacted (189 K in / 2 K out)
   ──────────────────────────────────────────────────────────────────
 
   Per model (4 API requests)
@@ -114,7 +114,7 @@ exports[`golden report snapshots > fixtures/corrupt.jsonl 1`] = `
 
   Top 1 most expensive turns
   ──────────────────────────────────────────────────────────────────
-    $0.00  14:00  text response (50 in / 200 out)
+    $0.00  11:00  text response (50 in / 200 out)
   ──────────────────────────────────────────────────────────────────
 
   Per model (2 API requests)
@@ -151,7 +151,7 @@ exports[`golden report snapshots > fixtures/multi-iteration.jsonl 1`] = `
 
   Top 1 most expensive turns
   ──────────────────────────────────────────────────────────────────
-    $0.01  13:00  Read (2 K in / 300 out)
+    $0.01  10:00  Read (2 K in / 300 out)
   ──────────────────────────────────────────────────────────────────
 
   Per model (1 API requests)
@@ -179,7 +179,7 @@ exports[`golden report snapshots > fixtures/subagent-session.jsonl 1`] = `
   Context compaction                 ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
   File reads (Read tool)             ░░░░░░░░░░░░░░░░░░░░░░░░   0%    $0.00
   ──────────────────────────────────────────────────────────────────
-  Context compacted at 15:36 - cost $0.00, dropped ~2 K tokens of history (sub-agent agent-a5a949b)
+  Context compacted at 12:36 - cost $0.00, dropped ~2 K tokens of history (sub-agent agent-a5a949b)
 
   Cache efficiency
   ──────────────────────────────────────────────────────────────────
@@ -197,8 +197,8 @@ exports[`golden report snapshots > fixtures/subagent-session.jsonl 1`] = `
 
   Top 2 most expensive turns
   ──────────────────────────────────────────────────────────────────
-    $1.48  10:44  Write ×2 + Read + Edit, +1 more tools, sub-agent ×1 (50 K in / 2 K out)
-    $0.27  10:41  Bash + Skill (26 K in / 761 out)
+    $1.48  07:44  Write ×2 + Read + Edit, +1 more tools, sub-agent ×1 (50 K in / 2 K out)
+    $0.27  07:41  Bash + Skill (26 K in / 761 out)
   ──────────────────────────────────────────────────────────────────
 
   Per model (19 API requests)
