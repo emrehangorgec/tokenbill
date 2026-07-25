@@ -26,6 +26,7 @@ export const palette = {
   overhead: 245, // gray
   cacheWrites: 179, // soft yellow
   compaction: 203, // red
+  serverTools: 114, // soft green
   good: 78, // green
   warn: 214, // orange-yellow
   bad: 203, // red

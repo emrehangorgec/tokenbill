@@ -1,4 +1,4 @@
-export const PRICING_AS_OF = "2026-07-11";
+export const PRICING_AS_OF = "2026-07-25";
 
 export interface ModelPrice {
   match: string; // longest-prefix match against the model id
@@ -28,9 +28,32 @@ export const FALLBACK_PRICE: ModelPrice = {
   ...DEFAULT_MULTS,
 };
 
+/**
+ * Server-side tools are billed per request, not per token.
+ *  - web search: $10 per 1,000 searches (errored searches are not billed, and
+ *    the logs only record requests that were actually charged).
+ *  - web fetch: no per-request charge - you pay only the tokens the fetched
+ *    content adds to the context, which the token-based categories already
+ *    capture. Kept as an explicit 0 so it shows up in --pricing overrides.
+ */
+export interface ServerToolPrice {
+  webSearchPerRequest: number;
+  webFetchPerRequest: number;
+}
+
+export const SERVER_TOOL_PRICING: ServerToolPrice = {
+  webSearchPerRequest: 0.01,
+  webFetchPerRequest: 0,
+};
+
 /** Replace the built-in table with a user-supplied JSON array (--pricing file). */
 export function overridePricing(entries: ModelPrice[]): void {
   PRICE_TABLE.splice(0, PRICE_TABLE.length, ...entries);
+}
+
+/** Override per-request server tool prices (--pricing file, object form). */
+export function overrideServerToolPricing(prices: Partial<ServerToolPrice>): void {
+  Object.assign(SERVER_TOOL_PRICING, prices);
 }
 
 export interface PriceLookup {

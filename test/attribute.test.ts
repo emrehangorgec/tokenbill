@@ -9,6 +9,7 @@ const FIXTURES = [
   "fixtures/multi-iteration.jsonl",
   "fixtures/compaction.jsonl",
   "fixtures/corrupt.jsonl",
+  "fixtures/server-tools.jsonl",
 ];
 
 describe("attribution invariant", () => {
@@ -30,6 +31,16 @@ describe("category classification", () => {
     expect(attr.toolResultsUSD).toBeGreaterThan(0);
     expect(attr.overheadUSD).toBeGreaterThan(0);
     expect(attr.compactionEvents).toHaveLength(0);
+  });
+});
+
+describe("server tools category", () => {
+  it("per-request charges land in serverTools, not in a token category", () => {
+    const session = claudeCodeAdapter.parse("fixtures/server-tools.jsonl");
+    const attr = attribute(session);
+    expect(attr.serverToolsUSD).toBeCloseTo(0.04, 10); // 4 searches @ $0.01
+    expect(attr.fileReadsUSD).toBe(0);
+    expect(attr.toolResultsUSD).toBe(0);
   });
 });
 

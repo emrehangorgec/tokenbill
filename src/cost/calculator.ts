@@ -1,5 +1,5 @@
-import type { NormalizedRequest, NormalizedSession } from "../adapters/types.js";
-import { lookupPrice } from "./pricing.js";
+import type { NormalizedRequest, NormalizedSession, Usage } from "../adapters/types.js";
+import { lookupPrice, SERVER_TOOL_PRICING } from "./pricing.js";
 
 export interface TokenTotals {
   input: number;
@@ -19,9 +19,22 @@ export interface CostBreakdown {
   totalUSD: number;
   perModel: ModelBreakdown[];
   tokens: TokenTotals;
-  serverToolUse: { webSearch: number; webFetch: number };
+  serverToolUse: { webSearch: number; webFetch: number; costUSD: number };
   subagentUSD: number;
   requestCount: number;
+}
+
+/**
+ * Per-request charges for Anthropic-hosted server tools. Billed per call rather
+ * than per token, so this sits alongside the token math instead of inside it.
+ */
+export function serverToolCostUSD(u: Usage): number {
+  const st = u.server_tool_use;
+  if (!st) return 0;
+  return (
+    (st.web_search_requests ?? 0) * SERVER_TOOL_PRICING.webSearchPerRequest +
+    (st.web_fetch_requests ?? 0) * SERVER_TOOL_PRICING.webFetchPerRequest
+  );
 }
 
 export function requestCostUSD(req: NormalizedRequest): number {
@@ -40,14 +53,15 @@ export function requestCostUSD(req: NormalizedRequest): number {
     u.output_tokens * perTokOut +
     u.cache_read_input_tokens * perTokIn * price.cacheReadMult +
     w5m * perTokIn * price.cacheWrite5mMult +
-    w1h * perTokIn * price.cacheWrite1hMult
+    w1h * perTokIn * price.cacheWrite1hMult +
+    serverToolCostUSD(u)
   );
 }
 
 export function calculate(session: NormalizedSession): CostBreakdown {
   const perModel = new Map<string, ModelBreakdown>();
   const tokens: TokenTotals = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
-  const serverToolUse = { webSearch: 0, webFetch: 0 };
+  const serverToolUse = { webSearch: 0, webFetch: 0, costUSD: 0 };
   let totalUSD = 0;
   let subagentUSD = 0;
 
@@ -63,6 +77,7 @@ export function calculate(session: NormalizedSession): CostBreakdown {
     tokens.cacheWrite += u.cache_creation_input_tokens;
     serverToolUse.webSearch += u.server_tool_use?.web_search_requests ?? 0;
     serverToolUse.webFetch += u.server_tool_use?.web_fetch_requests ?? 0;
+    serverToolUse.costUSD += serverToolCostUSD(u);
 
     let mb = perModel.get(req.model);
     if (!mb) {

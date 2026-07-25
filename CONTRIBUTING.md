@@ -32,7 +32,19 @@ covering a normal session plus edge cases (corrupt lines, missing fields).
 
 The price table lives in one file, [`src/cost/pricing.ts`](src/cost/pricing.ts).
 Bump the `asOf` date alongside any price change - it's printed in every report
-footer.
+footer. That file holds both `PRICE_TABLE` (per-token model rates) and
+`SERVER_TOOL_PRICING` (per-request charges for web search / web fetch).
+
+Users can override either without waiting for a release. `--pricing` accepts the
+bare model array, or an object with the parts you want to replace:
+
+```json
+{
+  "models": [{ "match": "claude-opus-5", "inputPerMTok": 5, "outputPerMTok": 25,
+               "cacheReadMult": 0.1, "cacheWrite5mMult": 1.25, "cacheWrite1hMult": 2 }],
+  "serverTools": { "webSearchPerRequest": 0.01, "webFetchPerRequest": 0 }
+}
+```
 
 ## Test fixtures
 

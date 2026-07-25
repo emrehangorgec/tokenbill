@@ -26,6 +26,7 @@ const C = {
   overhead: "#8a8a8a",
   cacheWrites: "#d7af5f",
   compaction: "#ff5f5f",
+  serverTools: "#87d787",
   good: "#5fd787",
   warn: "#ffaf00",
   bad: "#ff5f5f",
@@ -73,6 +74,7 @@ interface CategoryLike {
   overheadUSD: number;
   cacheWritesUSD: number;
   compactionUSD: number;
+  serverToolsUSD: number;
 }
 
 function categorySection(cat: CategoryLike, totalUSD: number): string {
@@ -84,6 +86,8 @@ function categorySection(cat: CategoryLike, totalUSD: number): string {
     ["Cache writes (premium)", cat.cacheWritesUSD, C.cacheWrites],
   ];
   if (cat.compactionUSD > 0) rows.push(["Context compaction", cat.compactionUSD, C.compaction]);
+  if (cat.serverToolsUSD > 0)
+    rows.push(["Server tools (web search)", cat.serverToolsUSD, C.serverTools]);
   rows.sort((a, b) => b[1] - a[1]);
   const body = rows
     .map(([label, amount, color]) => {
@@ -191,17 +195,29 @@ function turnsSection(turns: (Turn & { sessionId?: string })[], aggregate: boole
   return section(title, table(headers, rows, true));
 }
 
-function modelSection(perModel: ModelBreakdown[]): string {
+function modelSection(
+  perModel: ModelBreakdown[],
+  st: { webSearch: number; webFetch: number; costUSD: number },
+): string {
   const rows = perModel.map((m) => [
     esc(m.model),
     `<span data-v="${m.input + m.cacheRead + m.cacheWrite}">${tok(m.input + m.cacheRead + m.cacheWrite)}</span>`,
     `<span data-v="${m.output}">${tok(m.output)}</span>`,
     `<b data-v="${m.costUSD}">${usd(m.costUSD)}</b>`,
   ]);
-  return section(
-    "Per model",
-    table([["Model", "str"], ["In", "num"], ["Out", "num"], ["Cost", "num"]], rows, false),
+  let body = table(
+    [["Model", "str"], ["In", "num"], ["Out", "num"], ["Cost", "num"]],
+    rows,
+    false,
   );
+  if (st.webSearch + st.webFetch > 0) {
+    const parts: string[] = [];
+    if (st.webSearch > 0) parts.push(`${st.webSearch} web search${st.webSearch === 1 ? "" : "es"}`);
+    if (st.webFetch > 0) parts.push(`${st.webFetch} web fetch${st.webFetch === 1 ? "" : "es"}`);
+    const note = st.costUSD > 0 ? usd(st.costUSD) : "no per-request charge";
+    body += `<p class="dim">Server tools: ${esc(parts.join(", "))} &middot; ${esc(note)}</p>`;
+  }
+  return section("Per model", body);
 }
 
 function page(subtitle: string, totalUSD: number, sections: string[]): string {
@@ -303,7 +319,7 @@ export function renderHtml(
     cacheSection(cache),
     adviceSection(advice),
     turnsSection(turns, false),
-    modelSection(cost.perModel),
+    modelSection(cost.perModel, cost.serverToolUse),
   ]);
 }
 
@@ -338,7 +354,7 @@ export function renderAggregateHtml(result: AggregateResult, projectLabel: strin
     adviceSection(advice),
     trendSection(dailyTrend(result.sessions)),
     turnsSection(result.topTurns, true),
-    modelSection(result.perModel),
+    modelSection(result.perModel, result.serverToolUse),
     section(
       "Sessions (newest first)",
       table(

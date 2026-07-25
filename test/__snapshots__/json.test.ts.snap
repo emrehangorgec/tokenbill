@@ -2,8 +2,8 @@
 
 exports[`--json output > golden snapshot (subagent session) 1`] = `
 "{
-  "schemaVersion": 1,
-  "pricingAsOf": "2026-07-11",
+  "schemaVersion": 2,
+  "pricingAsOf": "2026-07-25",
   "session": {
     "id": "434bccac-30fc-4b1c-bf3f-477c103af21a",
     "source": "fixtures/subagent-session.jsonl",
@@ -30,7 +30,8 @@ exports[`--json output > golden snapshot (subagent session) 1`] = `
     "fileReadsUSD": 0.000112,
     "overheadUSD": 0.394799,
     "cacheWritesUSD": 1.209865,
-    "compactionUSD": 0.004967
+    "compactionUSD": 0.004967,
+    "serverToolsUSD": 0
   },
   "compactionEvents": [
     {
@@ -85,7 +86,8 @@ exports[`--json output > golden snapshot (subagent session) 1`] = `
   ],
   "serverToolUse": {
     "webSearch": 0,
-    "webFetch": 0
+    "webFetch": 0,
+    "costUSD": 0
   },
   "subagentUSD": 0.092633,
   "topTurns": [

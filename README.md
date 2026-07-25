@@ -56,17 +56,30 @@ session. Zero configuration either way.
 Options:
 
 ```
---json            machine-readable output (schemaVersion 1)
+--json            machine-readable output (schemaVersion 2)
 --html [file]     shareable single-file HTML report (default: tokenbill-report.html)
 --top <n>         number of expensive turns to show (default 10)
+--budget <usd>    exit 2 if the total exceeds this amount (for CI)
 --pricing <file>  override the built-in price table with your own JSON
 --no-color        disable colored output (NO_COLOR env also respected)
 ```
 
+### Budget guard in CI
+
+`--budget` still prints the full report, then exits `2` if you're over. Drop it into
+a workflow to fail the build when a project's spend crosses a line:
+
+```yaml
+- run: npx tokenbill . --budget 25
+```
+
+Exit codes: `0` ok, `1` error, `2` budget exceeded.
+
 ## What it tells you
 
-- **Total estimated cost** - token usage from the logs × current per-token prices, deduplicated per API request, priced per model (mixed-model sessions work), cache reads at 0.1×, cache writes at their 5-minute (1.25×) or 1-hour (2×) premium.
-- **Where it went** - output generation vs. tool results vs. file reads vs. system overhead vs. cache-write premiums vs. context compaction, attributed by an incremental-delta heuristic. Categories always sum exactly to the total.
+- **Total estimated cost** - token usage from the logs × current per-token prices, deduplicated per API request, priced per model (mixed-model sessions work), cache reads at 0.1×, cache writes at their 5-minute (1.25×) or 1-hour (2×) premium, plus per-request server tool charges.
+- **Where it went** - output generation vs. tool results vs. file reads vs. system overhead vs. cache-write premiums vs. context compaction vs. server tools, attributed by an incremental-delta heuristic. Categories always sum exactly to the total.
+- **Server tools** - web searches billed per request ($10 per 1,000), counted alongside the token costs they generate. Web fetch has no per-request charge, so it shows its call count and contributes only the tokens the fetched content adds.
 - **Compaction events** - when your context got summarized mid-session, what it cost, and how many tokens of history were dropped.
 - **Cache efficiency** - hit rate, dollars saved vs. running uncached, and dollars wasted on mid-session cache rebuilds (the signature of a broken prompt prefix).
 - **Top expensive turns** - the moments that actually burned the budget, each with a one-line description of what happened.
@@ -79,7 +92,7 @@ Options:
 - The dollar figure is an **API-equivalent estimate**. If you're on a Claude subscription (Pro/Max), you pay a flat fee - this number tells you what your usage would cost at API rates, which is still the right signal for spotting waste.
 - Category attribution is a documented heuristic, not exact accounting.
 - Prices change. The table ships with an `asOf` date (printed in every report footer) and lives in one file - [`src/cost/pricing.ts`](src/cost/pricing.ts). PRs updating it are the easiest contribution there is, and `--pricing` lets you override without waiting for a release.
-- Server tool calls (web search/fetch) are billed per-request and not yet priced - the report shows an unpriced count so they're not invisible.
+- Server tool pricing assumes the standard published rates. Errored web searches aren't billed by the API and don't appear in the logs as charged requests, so they're not counted here either.
 
 ## Privacy
 

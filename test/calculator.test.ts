@@ -29,6 +29,28 @@ describe("calculator on fixtures", () => {
     expect(cost.totalUSD).toBeCloseTo(2 * (50 * 1e-6 + 100 * 5e-6), 10);
   });
 
+  it("server tool calls are counted and priced per request", () => {
+    const session = claudeCodeAdapter.parse("fixtures/server-tools.jsonl");
+    const cost = calculate(session);
+    expect(cost.serverToolUse).toEqual({ webSearch: 4, webFetch: 2, costUSD: 0.04 });
+
+    // 2 requests × (100 in + 200 out) @ haiku $1/$5 per MTok, plus 4 searches @ $0.01.
+    const tokensUSD = 2 * (100 * 1e-6 + 200 * 5e-6);
+    expect(cost.totalUSD).toBeCloseTo(tokensUSD + 0.04, 10);
+  });
+
+  it("web fetch carries no per-request charge", () => {
+    const session = claudeCodeAdapter.parse("fixtures/server-tools.jsonl");
+    const fetchOnly = {
+      ...session,
+      requests: session.requests.map((r) => ({
+        ...r,
+        usage: { ...r.usage, server_tool_use: { web_search_requests: 0, web_fetch_requests: 5 } },
+      })),
+    };
+    expect(calculate(fetchOnly).serverToolUse.costUSD).toBe(0);
+  });
+
   it("per-model breakdown sums to total", () => {
     const session = claudeCodeAdapter.parse("fixtures/subagent-session.jsonl");
     const cost = calculate(session);

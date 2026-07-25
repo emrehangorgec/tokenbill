@@ -31,7 +31,7 @@ export function renderJson(
 ): string {
   return JSON.stringify(
     {
-      schemaVersion: 1,
+      schemaVersion: 2,
       pricingAsOf: PRICING_AS_OF,
       session: {
         id: session.sessionId,
@@ -52,6 +52,7 @@ export function renderJson(
         overheadUSD: round(attr.overheadUSD),
         cacheWritesUSD: round(attr.cacheWritesUSD),
         compactionUSD: round(attr.compactionUSD),
+        serverToolsUSD: round(attr.serverToolsUSD),
       },
       compactionEvents: attr.compactionEvents.map((e) => ({
         timestamp: e.timestamp,
@@ -74,7 +75,7 @@ export function renderJson(
         }),
       ),
       perModel: cost.perModel.map((m) => ({ ...m, costUSD: round(m.costUSD) })),
-      serverToolUse: cost.serverToolUse,
+      serverToolUse: { ...cost.serverToolUse, costUSD: round(cost.serverToolUse.costUSD) },
       subagentUSD: round(cost.subagentUSD),
       topTurns: turns.map((t) => ({
         startTime: t.startTime,
@@ -94,7 +95,7 @@ export function renderJson(
 export function renderAggregateJson(result: AggregateResult, projectLabel: string): string {
   return JSON.stringify(
     {
-      schemaVersion: 1,
+      schemaVersion: 2,
       mode: "aggregate",
       pricingAsOf: PRICING_AS_OF,
       projectLabel,
@@ -108,6 +109,7 @@ export function renderAggregateJson(result: AggregateResult, projectLabel: strin
         overheadUSD: round(result.categories.overheadUSD),
         cacheWritesUSD: round(result.categories.cacheWritesUSD),
         compactionUSD: round(result.categories.compactionUSD),
+        serverToolsUSD: round(result.categories.serverToolsUSD),
       },
       compactionEventCount: result.compactionEventCount,
       cache: {
@@ -126,6 +128,7 @@ export function renderAggregateJson(result: AggregateResult, projectLabel: strin
       ),
       dailyTrend: dailyTrend(result.sessions).map((b) => ({ ...b, costUSD: round(b.costUSD) })),
       perModel: result.perModel.map((m) => ({ ...m, costUSD: round(m.costUSD) })),
+      serverToolUse: { ...result.serverToolUse, costUSD: round(result.serverToolUse.costUSD) },
       sessions: result.sessions.map((s) => ({ ...s, costUSD: round(s.costUSD) })),
       topTurns: result.topTurns.map((t) => ({
         sessionId: t.sessionId,

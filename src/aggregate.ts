@@ -26,6 +26,7 @@ export interface AggregateCategories {
   overheadUSD: number;
   cacheWritesUSD: number;
   compactionUSD: number;
+  serverToolsUSD: number;
 }
 
 export interface AggregateResult {
@@ -37,6 +38,7 @@ export interface AggregateResult {
   compactionEventCount: number;
   cache: CacheAnalysis;
   perModel: ModelBreakdown[];
+  serverToolUse: { webSearch: number; webFetch: number; costUSD: number };
   topTurns: AggregateTurn[];
 }
 
@@ -49,6 +51,7 @@ export function aggregate(sessions: NormalizedSession[], topN = 10): AggregateRe
     overheadUSD: 0,
     cacheWritesUSD: 0,
     compactionUSD: 0,
+    serverToolsUSD: 0,
   };
   let totalUSD = 0;
   let requestCount = 0;
@@ -60,6 +63,7 @@ export function aggregate(sessions: NormalizedSession[], topN = 10): AggregateRe
     cacheWasted = 0,
     cacheInvalidations = 0;
   const modelMap = new Map<string, ModelBreakdown>();
+  const serverToolUse = { webSearch: 0, webFetch: 0, costUSD: 0 };
   const allTurns: AggregateTurn[] = [];
 
   for (const session of sessions) {
@@ -85,6 +89,7 @@ export function aggregate(sessions: NormalizedSession[], topN = 10): AggregateRe
     categories.overheadUSD += attr.overheadUSD;
     categories.cacheWritesUSD += attr.cacheWritesUSD;
     categories.compactionUSD += attr.compactionUSD;
+    categories.serverToolsUSD += attr.serverToolsUSD;
     compactionEventCount += attr.compactionEvents.length;
 
     cacheRead += cache.tokens.read;
@@ -93,6 +98,10 @@ export function aggregate(sessions: NormalizedSession[], topN = 10): AggregateRe
     cacheSaved += cache.savedUSD;
     cacheWasted += cache.wastedUSD;
     cacheInvalidations += cache.invalidations;
+
+    serverToolUse.webSearch += cost.serverToolUse.webSearch;
+    serverToolUse.webFetch += cost.serverToolUse.webFetch;
+    serverToolUse.costUSD += cost.serverToolUse.costUSD;
 
     for (const m of cost.perModel) {
       let acc = modelMap.get(m.model);
@@ -134,6 +143,7 @@ export function aggregate(sessions: NormalizedSession[], topN = 10): AggregateRe
     compactionEventCount,
     cache,
     perModel: [...modelMap.values()].sort((a, b) => b.costUSD - a.costUSD),
+    serverToolUse,
     topTurns: allTurns.slice(0, topN),
   };
 }

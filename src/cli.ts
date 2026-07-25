@@ -7,7 +7,7 @@ import { claudeCodeAdapter } from "./adapters/claude-code.js";
 import { attribute } from "./attribute.js";
 import { analyzeCache } from "./cost/cache.js";
 import { calculate } from "./cost/calculator.js";
-import { overridePricing } from "./cost/pricing.js";
+import { overridePricing, overrideServerToolPricing } from "./cost/pricing.js";
 import { claudeProjectsRoot, encodeProjectPath, resolveProjectLogDir } from "./project-dir.js";
 import { renderAggregateHtml, renderHtml } from "./report/html.js";
 import { renderAggregateJson, renderJson } from "./report/json.js";
@@ -29,9 +29,12 @@ Options:
   --html [file]     write a shareable single-file HTML report
                     (default: tokenbill-report.html)
   --top <n>         number of expensive turns to show (default 10)
+  --budget <usd>    exit 2 if the reported total exceeds this amount (for CI)
   --pricing <file>  JSON file overriding the built-in price table
   --no-color        disable colored output (NO_COLOR env also respected)
-  -h, --help        show this help`;
+  -h, --help        show this help
+
+Exit codes: 0 ok, 1 error, 2 budget exceeded.`;
 
 function findSessionFiles(dir: string): string[] {
   if (!fs.existsSync(dir)) return [];
@@ -117,7 +120,32 @@ const argv = process.argv.slice(2);
 let json = false;
 let html: string | undefined;
 let top = 10;
+let budget: number | undefined;
 let target: string | undefined;
+
+/**
+ * --pricing accepts either the bare model array (original format) or an object
+ * `{ models?: [...], serverTools?: {...} }` so per-request tool prices can be
+ * overridden too.
+ */
+function applyPricingFile(parsed: unknown): void {
+  if (Array.isArray(parsed)) {
+    overridePricing(parsed);
+    return;
+  }
+  if (parsed && typeof parsed === "object") {
+    const o = parsed as { models?: unknown; serverTools?: unknown };
+    if (Array.isArray(o.models)) overridePricing(o.models);
+    if (o.serverTools && typeof o.serverTools === "object") {
+      overrideServerToolPricing(o.serverTools);
+    }
+    if (!o.models && !o.serverTools) {
+      throw new Error("expected an array of model prices, or { models, serverTools }");
+    }
+    return;
+  }
+  throw new Error("expected an array of model prices, or { models, serverTools }");
+}
 
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i];
@@ -137,6 +165,12 @@ for (let i = 0; i < argv.length; i++) {
       console.error("--top expects a positive integer");
       process.exit(1);
     }
+  } else if (a === "--budget") {
+    budget = Number(argv[++i]);
+    if (!Number.isFinite(budget) || budget < 0) {
+      console.error("--budget expects a non-negative dollar amount");
+      process.exit(1);
+    }
   } else if (a === "--pricing") {
     const file = argv[++i];
     if (!file || !fs.existsSync(file)) {
@@ -144,7 +178,9 @@ for (let i = 0; i < argv.length; i++) {
       process.exit(1);
     }
     try {
-      overridePricing(JSON.parse(fs.readFileSync(file, "utf8")));
+      // Strip a UTF-8 BOM: Windows editors and PowerShell add one, and
+      // JSON.parse rejects it.
+      applyPricingFile(JSON.parse(fs.readFileSync(file, "utf8").replace(/^﻿/, "")));
     } catch (e) {
       console.error(`Invalid pricing file: ${(e as Error).message}`);
       process.exit(1);
@@ -175,6 +211,8 @@ if (json && html) {
   process.exit(1);
 }
 
+let totalUSD = 0;
+
 try {
   const resolved = resolveTarget(target);
 
@@ -184,6 +222,7 @@ try {
     const attr = attribute(session);
     const turns = topTurns(session, top);
     const cache = analyzeCache(session);
+    totalUSD = cost.totalUSD;
     if (html) {
       fs.writeFileSync(html, renderHtml(session, cost, attr, turns, cache));
       console.error(`Wrote ${html}`);
@@ -198,6 +237,7 @@ try {
     const sessions = resolved.files.map((f) => claudeCodeAdapter.parse(f));
     const result = aggregate(sessions, top);
     const label = maskLabel(resolved.label);
+    totalUSD = result.totalUSD;
     if (html) {
       fs.writeFileSync(html, renderAggregateHtml(result, label));
       console.error(`Wrote ${html}`);
@@ -210,4 +250,12 @@ try {
 } catch (e) {
   console.error(`tokenbill: ${(e as Error).message}`);
   process.exit(1);
+}
+
+// Budget guard runs after the report so CI keeps the output and still fails.
+if (budget !== undefined && totalUSD > budget) {
+  console.error(
+    `tokenbill: spend $${totalUSD.toFixed(2)} exceeds budget $${budget.toFixed(2)}`,
+  );
+  process.exit(2);
 }

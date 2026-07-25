@@ -56,6 +56,8 @@ function categoryLines(attr: Attribution, totalUSD: number): string[] {
     ["Cache writes (premium)", attr.cacheWritesUSD, palette.cacheWrites],
   ];
   if (attr.compactionUSD > 0) rows.push(["Context compaction", attr.compactionUSD, palette.compaction]);
+  if (attr.serverToolsUSD > 0)
+    rows.push(["Server tools (web search)", attr.serverToolsUSD, palette.serverTools]);
   rows.sort((a, b) => b[1] - a[1]);
   const lines = [`  ${bold("Where it went")}`, dim(`  ${RULE}`)];
   for (const [label, amount, color] of rows) {
@@ -156,6 +158,16 @@ function trendLines(buckets: ReturnType<typeof dailyTrend>): string[] {
   return lines;
 }
 
+/** Server tool call counts + their per-request cost (web fetch is free of charge). */
+function serverToolLines(st: { webSearch: number; webFetch: number; costUSD: number }): string[] {
+  if (st.webSearch + st.webFetch === 0) return [];
+  const parts: string[] = [];
+  if (st.webSearch > 0) parts.push(`${st.webSearch} web search${st.webSearch === 1 ? "" : "es"}`);
+  if (st.webFetch > 0) parts.push(`${st.webFetch} web fetch${st.webFetch === 1 ? "" : "es"}`);
+  const note = st.costUSD > 0 ? usd(st.costUSD) : dim("no per-request charge");
+  return [`  Server tools: ${parts.join(", ")} - ${note}`];
+}
+
 function totalLines(totalUSD: number): string[] {
   return [
     `  ${bold("TOTAL ESTIMATED COST".padEnd(50))}${bold(paint(palette.brand, usd(totalUSD)))}`,
@@ -228,12 +240,7 @@ export function renderReport(
   if (cost.subagentUSD > 0) {
     lines.push(`  Sub-agents: ${usd(cost.subagentUSD)} of the total`);
   }
-  const st = cost.serverToolUse;
-  if (st.webSearch + st.webFetch > 0) {
-    lines.push(
-      `  Server tools: ${st.webSearch} web searches, ${st.webFetch} web fetches ${dim("(not priced)")}`,
-    );
-  }
+  lines.push(...serverToolLines(cost.serverToolUse));
   if (session.skippedLines > 0) {
     lines.push(paint(palette.warn, `  Skipped ${session.skippedLines} malformed log line(s)`));
   }
@@ -304,6 +311,7 @@ export function renderAggregateReport(
     );
   }
   lines.push(dim(`  ${RULE}`));
+  lines.push(...serverToolLines(result.serverToolUse));
 
   lines.push("");
   lines.push(`  ${bold("Sessions (newest first)")}`);

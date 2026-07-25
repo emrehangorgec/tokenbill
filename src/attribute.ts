@@ -13,10 +13,13 @@
  *    keep paying (at cache-read rates) for everything sitting in context.
  *  - negative delta            → compaction event: that request's uncached-input
  *    + cache-write spend goes to "compaction"; composition is rescaled.
+ *  - server tool charges       → server tools (billed per call, not per token,
+ *    so it is added verbatim rather than distributed over the composition)
  *
  * Invariant: category dollars sum exactly to total dollars (residual → overhead).
  */
 import type { NormalizedRequest, NormalizedSession, Stream } from "./adapters/types.js";
+import { serverToolCostUSD } from "./cost/calculator.js";
 import { lookupPrice } from "./cost/pricing.js";
 
 export const CHARS_PER_TOKEN = 3.5;
@@ -35,6 +38,8 @@ export interface Categories {
   overheadUSD: number;
   cacheWritesUSD: number;
   compactionUSD: number;
+  /** per-request server tool charges (web search); not token-derived */
+  serverToolsUSD: number;
 }
 
 export interface Attribution extends Categories {
@@ -79,6 +84,7 @@ function attributeStream(stream: Stream, acc: Attribution): void {
     const req = ev.request;
     const { uncachedInUSD, cacheReadUSD, writeUSD, outUSD, effIn } = requestCostParts(req);
     acc.generationUSD += outUSD;
+    acc.serverToolsUSD += serverToolCostUSD(req.usage);
 
     let inputSideUSD = uncachedInUSD + cacheReadUSD;
 
@@ -142,6 +148,7 @@ export function attribute(session: NormalizedSession): Attribution {
     overheadUSD: 0,
     cacheWritesUSD: 0,
     compactionUSD: 0,
+    serverToolsUSD: 0,
     compactionEvents: [],
   };
   for (const stream of session.streams) attributeStream(stream, acc);
@@ -155,6 +162,7 @@ export function attributionTotalUSD(a: Categories): number {
     a.toolResultsUSD +
     a.overheadUSD +
     a.cacheWritesUSD +
-    a.compactionUSD
+    a.compactionUSD +
+    a.serverToolsUSD
   );
 }
