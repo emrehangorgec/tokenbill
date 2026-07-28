@@ -10,6 +10,10 @@ export interface Usage {
   cache_creation_input_tokens: number;
   cache_creation?: CacheCreationSplit;
   server_tool_use?: { web_search_requests?: number; web_fetch_requests?: number };
+  /** "fast" when the request ran in fast mode, which is priced at a premium. */
+  speed?: string;
+  /** "standard" | "batch" | "priority"; batch is billed at a discount. */
+  service_tier?: string;
 }
 
 export interface ToolCall {

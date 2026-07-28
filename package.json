@@ -17,7 +17,9 @@
     "test": "vitest run",
     "dev": "tsx src/cli.ts",
     "demo": "tsx scripts/render-svg.ts",
-    "prepublishOnly": "npm run build && npm test"
+    "pricing:sync": "tsx scripts/sync-pricing.ts",
+    "pricing:audit": "tsx scripts/sync-pricing.ts --audit",
+    "prepublishOnly": "npm run pricing:audit && npm run build && npm test"
   },
   "license": "MIT",
   "devDependencies": {
@@ -27,3 +29,4 @@
     "@types/node": "^22.0.0"
   }
 }
+

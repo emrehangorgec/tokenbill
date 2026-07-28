@@ -31,7 +31,7 @@ export function analyzeCache(session: NormalizedSession): CacheAnalysis {
     for (const ev of stream.events) {
       if (ev.kind !== "request") continue;
       const u = ev.request.usage;
-      const { price } = lookupPrice(ev.request.model);
+      const { price } = lookupPrice(ev.request.model, ev.request.timestamp);
       const rateIn = price.inputPerMTok / 1e6;
 
       read += u.cache_read_input_tokens;

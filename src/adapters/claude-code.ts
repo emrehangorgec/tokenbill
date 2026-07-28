@@ -39,6 +39,10 @@ function toUsage(raw: any): Usage {
           web_fetch_requests: num(raw.server_tool_use.web_fetch_requests),
         }
       : undefined,
+    // Both change what the request cost: fast mode is a premium rate, batch a
+    // discount. Absent on most records, which means standard speed and tier.
+    speed: typeof raw.speed === "string" ? raw.speed : undefined,
+    service_tier: typeof raw.service_tier === "string" ? raw.service_tier : undefined,
   };
 }
 

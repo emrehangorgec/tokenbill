@@ -5,7 +5,7 @@ import type { CacheAnalysis } from "../cost/cache.js";
 import type { CostBreakdown } from "../cost/calculator.js";
 import type { Turn } from "../turns.js";
 import { advise, type Advice } from "../advise.js";
-import { PRICING_AS_OF } from "../cost/pricing.js";
+import { pricingLabel } from "../cost/pricing.js";
 import { dailyTrend } from "../trends.js";
 import { bold, dim, paint, palette } from "./theme.js";
 
@@ -176,7 +176,7 @@ function totalLines(totalUSD: number): string[] {
 
 function footer(): string {
   return dim(
-    `  API-equivalent cost estimate · prices as of ${PRICING_AS_OF} · subscription users pay flat fees`,
+    `  API-equivalent cost estimate · prices as of ${pricingLabel()} · subscription users pay flat fees`,
   );
 }
 

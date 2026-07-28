@@ -10,11 +10,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
       - run: npm ci
       - run: npx tsc --noEmit
+      - run: npx tsc --noEmit -p scripts/tsconfig.json
+      - run: npx tsc --noEmit -p test/tsconfig.json
+      # Structural check on the price table (lapsed or overlapping rate
+      # windows). Offline and clock-independent - only fires on a real gap.
+      - run: npm run pricing:audit
       - run: npm test

@@ -47,7 +47,7 @@ export interface Attribution extends Categories {
 }
 
 function requestCostParts(req: NormalizedRequest) {
-  const { price } = lookupPrice(req.model);
+  const { price } = lookupPrice(req.model, req.timestamp);
   const rateIn = price.inputPerMTok / 1e6;
   const rateOut = price.outputPerMTok / 1e6;
   const u = req.usage;

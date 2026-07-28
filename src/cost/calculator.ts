@@ -1,5 +1,5 @@
 import type { NormalizedRequest, NormalizedSession, Usage } from "../adapters/types.js";
-import { lookupPrice, SERVER_TOOL_PRICING } from "./pricing.js";
+import { lookupPrice, SERVER_TOOL_PRICING, TIER_MULTIPLIERS } from "./pricing.js";
 
 export interface TokenTotals {
   input: number;
@@ -38,10 +38,19 @@ export function serverToolCostUSD(u: Usage): number {
 }
 
 export function requestCostUSD(req: NormalizedRequest): number {
-  const { price } = lookupPrice(req.model);
+  // Priced against the request's own timestamp: rates have effective dates, so
+  // a session logged before a promotional window closed must keep the rate it
+  // was actually billed at.
+  const { price } = lookupPrice(req.model, req.timestamp);
   const u = req.usage;
-  const perTokIn = price.inputPerMTok / 1e6;
-  const perTokOut = price.outputPerMTok / 1e6;
+
+  // Fast mode runs the same model at premium rates; batch tier discounts every
+  // token class. Priority tier is not modelled - see README caveats.
+  const rates = u.speed === "fast" && price.fast ? price.fast : price;
+  const tierMult = u.service_tier === "batch" ? TIER_MULTIPLIERS.batch : 1;
+
+  const perTokIn = (rates.inputPerMTok / 1e6) * tierMult;
+  const perTokOut = (rates.outputPerMTok / 1e6) * tierMult;
 
   // Cache writes: price by TTL split when available, else assume 5m.
   const split = u.cache_creation;
@@ -89,7 +98,7 @@ export function calculate(session: NormalizedSession): CostBreakdown {
         output: 0,
         cacheRead: 0,
         cacheWrite: 0,
-        pricedExactly: lookupPrice(req.model).exact,
+        pricedExactly: lookupPrice(req.model, req.timestamp).exact,
       };
       perModel.set(req.model, mb);
     }

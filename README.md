@@ -91,12 +91,16 @@ Exit codes: `0` ok, `1` error, `2` budget exceeded.
 
 - The dollar figure is an **API-equivalent estimate**. If you're on a Claude subscription (Pro/Max), you pay a flat fee - this number tells you what your usage would cost at API rates, which is still the right signal for spotting waste.
 - Category attribution is a documented heuristic, not exact accounting.
-- Prices change. The table ships with an `asOf` date (printed in every report footer) and lives in one file - [`src/cost/pricing.ts`](src/cost/pricing.ts). PRs updating it are the easiest contribution there is, and `--pricing` lets you override without waiting for a release.
+- Prices change. The table ships with an `asOf` date (printed in every report footer) and is refreshed with `npm run pricing:sync` - see [CONTRIBUTING.md](CONTRIBUTING.md#updating-pricing). Rates have effective dates, so a session is priced at the rate it was actually billed at - including promotional windows like Sonnet 5's introductory $2/$10. `--pricing` still overrides everything without waiting for a release.
+- A model with no published rate is **flagged, not guessed at**: it's priced at fallback Sonnet rates and the report marks it (`~unknown model, sonnet rates`).
+- Fast mode (`usage.speed`) is priced at its premium and the batch service tier at its discount. Priority tier is billed as standard - if you use it, the total is understated.
 - Server tool pricing assumes the standard published rates. Errored web searches aren't billed by the API and don't appear in the logs as charged requests, so they're not counted here either.
 
 ## Privacy
 
 `tokenbill` never makes a network call. It reads local files and prints text. The test fixtures in this repo are anonymized (same-length placeholder text; structure, token counts and tool names preserved) via [`scripts/anonymize.ts`](scripts/anonymize.ts).
+
+That holds even for pricing: [`scripts/sync-pricing.ts`](scripts/sync-pricing.ts) is run manually to refresh the table, and its output is committed as source. The published package contains `dist` only, so there is no fetch path at runtime, no cache directory, and nothing to opt out of.
 
 ## Supported agents
 
@@ -110,8 +114,24 @@ npm test          # vitest: unit + golden-file snapshot tests
 npm run build     # tsc → dist/
 npm run dev       # tsx src/cli.ts
 npm run demo      # regenerate assets/demo.svg from fixtures/basic.jsonl
+
+npm run pricing:sync    # refresh the price table from upstream (the only network call)
+npm run pricing:audit   # validate the shipped table offline
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for adapter contribution and pricing update guidelines.
+Type-checking is three projects, and CI runs all three - `tsx` and `vitest` both
+transpile without checking, so the scripts and the test suite are only covered by
+their own configs:
+
+```
+npx tsc --noEmit                          # src/ (the build project)
+npx tsc --noEmit -p scripts/tsconfig.json # dev scripts
+npx tsc --noEmit -p test/tsconfig.json    # test suite
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md#updating-pricing) before touching prices -
+`src/cost/prices.generated.ts` is generated, and hand-curated facts belong in
+`src/cost/pricing.overrides.json`. [CONTRIBUTING.md](CONTRIBUTING.md) also covers
+adapter contributions.
 
 Licensed under the [MIT License](LICENSE).

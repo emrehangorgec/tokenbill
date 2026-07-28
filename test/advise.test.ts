@@ -11,6 +11,7 @@ function categories(over: Partial<Categories> = {}): Categories {
     overheadUSD: 0,
     cacheWritesUSD: 0,
     compactionUSD: 0,
+    serverToolsUSD: 0,
     ...over,
   };
 }

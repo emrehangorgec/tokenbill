@@ -1,0 +1,73 @@
+name: Pricing sync
+
+on:
+  schedule:
+    # Every Monday 05:13 UTC. Off the hour on purpose -
+    # GitHub Actions delays jobs scheduled at popular times like the top of
+    # the hour, so scheduled workflows should pick an arbitrary minute.
+    - cron: "13 5 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      # Writes src/cost/prices.generated.ts. Never fails the job on a rate
+      # change or an override/feed mismatch - those are surfaced in the PR
+      # body below for a human to review, not treated as CI failures.
+      - name: Run pricing sync
+        run: npm run pricing:sync 2>&1 | tee sync-output.log
+
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet -- src/cost/prices.generated.ts; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open pull request with the rate diff
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          BRANCH="pricing-sync"
+          git checkout -B "$BRANCH"
+          git add src/cost/prices.generated.ts
+          git commit -m "chore: sync pricing from upstream feed"
+          git push --force origin "$BRANCH"
+
+          BODY_FILE="$(mktemp)"
+          {
+            echo "Automated weekly run of \`npm run pricing:sync\`."
+            echo
+            if grep -q "MISMATCH" sync-output.log; then
+              echo "**Override mismatch detected below - review \`pricing.overrides.json\` before merging.**"
+              echo
+            fi
+            echo '```'
+            cat sync-output.log
+            echo '```'
+          } > "$BODY_FILE"
+
+          if gh pr view "$BRANCH" --json number >/dev/null 2>&1; then
+            gh pr edit "$BRANCH" --body-file "$BODY_FILE"
+          else
+            gh pr create --title "chore: sync pricing" --body-file "$BODY_FILE" \
+              --base main --head "$BRANCH"
+          fi
