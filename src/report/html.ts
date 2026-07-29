@@ -10,7 +10,7 @@ import type { CacheAnalysis } from "../cost/cache.js";
 import type { CostBreakdown, ModelBreakdown } from "../cost/calculator.js";
 import type { Turn } from "../turns.js";
 import { advise, type Advice } from "../advise.js";
-import { PRICING_AS_OF } from "../cost/pricing.js";
+import { pricingLabel } from "../cost/pricing.js";
 import { dailyTrend, type DayBucket } from "../trends.js";
 
 const C = {
@@ -265,7 +265,7 @@ function page(subtitle: string, totalUSD: number, sections: string[]): string {
 <div class="total">${usd(totalUSD)}</div>
 <div class="dim">TOTAL ESTIMATED COST</div>
 ${sections.filter(Boolean).join("\n")}
-<footer>API-equivalent cost estimate &middot; prices as of ${esc(PRICING_AS_OF)} &middot; subscription users pay flat fees</footer>
+<footer>API-equivalent cost estimate &middot; prices as of ${esc(pricingLabel())} &middot; subscription users pay flat fees</footer>
 </main>
 <script>
 function st(th,i){

@@ -1,0 +1,12 @@
+// Same reason as scripts/tsconfig.json: the root project only includes `src`,
+// so without this the test files get no `types: ["node"]` in the editor and are
+// skipped by `npx tsc --noEmit`. Vitest transpiles without type-checking, so
+// this config is the only thing that type-checks the suite.
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".."
+  },
+  "include": ["."]
+}

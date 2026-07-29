@@ -1,0 +1,16 @@
+// Editors resolve a file's project by walking up to the nearest tsconfig.json.
+// The root one only includes `src`, so without this file the dev scripts land in
+// an inferred project without `types: ["node"]` - `fs`, `path` and `process`
+// come up as "cannot find name", and `npx tsc --noEmit` never checks them.
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // Type-check only: these scripts run through tsx, they are never built,
+    // and they are excluded from the published package.
+    "noEmit": true,
+    // The root sets rootDir to `src`; widen it so files here aren't reported
+    // as living outside the project root.
+    "rootDir": ".."
+  },
+  "include": ["."]
+}

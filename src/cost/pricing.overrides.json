@@ -1,0 +1,61 @@
+{
+  "$comment": [
+    "Hand-curated pricing facts that the machine-readable feed does not model.",
+    "Consumed by scripts/sync-pricing.ts, merged into src/cost/prices.generated.ts.",
+    "This file IS edited by hand; the generated file is not.",
+    "",
+    "Each entry is keyed by the model-id prefix it applies to and is merged on",
+    "top of whatever the feed reports for that prefix.",
+    "",
+    "'verify: true' asks the sync script to compare the hand-entered rates",
+    "against the feed and report any mismatch instead of silently overwriting."
+  ],
+
+  "batchMult": 0.5,
+
+  "windows": {
+    "$comment": "Promotional / dated rates. The feed always reports today's effective price with no start or end date, so promo boundaries have to be declared here or a session logged after the boundary is priced with the promo rate.",
+    "claude-sonnet-5": [
+      {
+        "inputPerMTok": 2,
+        "outputPerMTok": 10,
+        "effectiveTo": "2026-08-31",
+        "note": "introductory pricing"
+      },
+      {
+        "inputPerMTok": 3,
+        "outputPerMTok": 15,
+        "effectiveFrom": "2026-09-01",
+        "note": "standard rate after intro period"
+      }
+    ]
+  },
+
+  "fast": {
+    "$comment": "Fast mode (usage.speed === 'fast') runs the same model at premium rates. Not present in the feed. Opus 4.7 fast mode was removed and is deliberately absent.",
+    "claude-opus-5": { "inputPerMTok": 10, "outputPerMTok": 50 },
+    "claude-opus-4-8": { "inputPerMTok": 10, "outputPerMTok": 50 }
+  },
+
+  "models": {
+    "$comment": "Models the feed omits or gets wrong. Retired models' rates are frozen - they will never change again - so they live here rather than depending on the feed continuing to carry them. verify:true means the sync script still cross-checks them while the feed has them.",
+    "claude-mythos-5": { "inputPerMTok": 10, "outputPerMTok": 50, "note": "Project Glasswing; absent from the public feed", "verify": true },
+    "claude-opus-4-1": { "inputPerMTok": 15, "outputPerMTok": 75, "note": "pre-4.5 Opus tier", "verify": true },
+    "claude-opus-4-0": { "inputPerMTok": 15, "outputPerMTok": 75, "note": "pre-4.5 Opus tier", "verify": true },
+    "claude-opus-4-20250514": { "inputPerMTok": 15, "outputPerMTok": 75, "note": "pre-4.5 Opus tier", "verify": true },
+    "claude-sonnet-4-0": { "inputPerMTok": 3, "outputPerMTok": 15, "verify": true },
+    "claude-sonnet-4-20250514": { "inputPerMTok": 3, "outputPerMTok": 15, "verify": true },
+    "claude-3-7-sonnet": { "inputPerMTok": 3, "outputPerMTok": 15, "verify": true },
+    "claude-3-5-sonnet": { "inputPerMTok": 3, "outputPerMTok": 15, "verify": true },
+    "claude-3-opus": { "inputPerMTok": 15, "outputPerMTok": 75, "verify": true },
+    "claude-3-sonnet": { "inputPerMTok": 3, "outputPerMTok": 15, "verify": true },
+    "claude-3-5-haiku": { "inputPerMTok": 0.8, "outputPerMTok": 4, "verify": true },
+    "claude-3-haiku": { "inputPerMTok": 0.25, "outputPerMTok": 1.25, "verify": true },
+    "claude-haiku-3": { "inputPerMTok": 0.25, "outputPerMTok": 1.25, "verify": true }
+  },
+
+  "drop": {
+    "$comment": "Feed keys deliberately excluded from the generated table (matched exactly, not as prefixes). Bare generic keys like 'claude-opus-4' are dropped because as a prefix they silently mis-price sibling versions: claude-opus-4-1 is $15/$75 while claude-opus-4-5 is $5/$25. An unknown model must fall through to the flagged fallback rather than to a wrong sibling rate.",
+    "keys": ["claude-opus-4", "claude-sonnet-4", "claude-haiku-4", "claude-2", "claude-2.1", "claude-instant-1", "claude-instant-1.2"]
+  }
+}
