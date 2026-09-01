@@ -41,7 +41,7 @@ exports[`golden report snapshots > fixtures/basic.jsonl 1`] = `
   ──────────────────────────────────────────────────────────────────
   Tokens: 14 uncached in · 373 K cache read · 58 K cache write · 3 K out
 
-  API-equivalent cost estimate · prices as of 2026-07-28 · subscription users pay flat fees
+  API-equivalent cost estimate · prices as of <PRICING_AS_OF> · subscription users pay flat fees
 "
 `;
 
@@ -87,7 +87,7 @@ exports[`golden report snapshots > fixtures/compaction.jsonl 1`] = `
   ──────────────────────────────────────────────────────────────────
   Tokens: 9 K uncached in · 197 K cache read · 35 K cache write · 2 K out
 
-  API-equivalent cost estimate · prices as of 2026-07-28 · subscription users pay flat fees
+  API-equivalent cost estimate · prices as of <PRICING_AS_OF> · subscription users pay flat fees
 "
 `;
 
@@ -124,7 +124,7 @@ exports[`golden report snapshots > fixtures/corrupt.jsonl 1`] = `
   Tokens: 100 uncached in · 0 cache read · 0 cache write · 200 out
   Skipped 2 malformed log line(s)
 
-  API-equivalent cost estimate · prices as of 2026-07-28 · subscription users pay flat fees
+  API-equivalent cost estimate · prices as of <PRICING_AS_OF> · subscription users pay flat fees
 "
 `;
 
@@ -160,7 +160,7 @@ exports[`golden report snapshots > fixtures/multi-iteration.jsonl 1`] = `
   ──────────────────────────────────────────────────────────────────
   Tokens: 100 uncached in · 2 K cache read · 500 cache write · 300 out
 
-  API-equivalent cost estimate · prices as of 2026-07-28 · subscription users pay flat fees
+  API-equivalent cost estimate · prices as of <PRICING_AS_OF> · subscription users pay flat fees
 "
 `;
 
@@ -209,6 +209,6 @@ exports[`golden report snapshots > fixtures/subagent-session.jsonl 1`] = `
   Tokens: 5 K uncached in · 686 K cache read · 103 K cache write · 3 K out
   Sub-agents: $0.09 of the total
 
-  API-equivalent cost estimate · prices as of 2026-07-28 · subscription users pay flat fees
+  API-equivalent cost estimate · prices as of <PRICING_AS_OF> · subscription users pay flat fees
 "
 `;

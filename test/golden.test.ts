@@ -5,6 +5,7 @@ import { analyzeCache } from "../src/cost/cache.js";
 import { calculate } from "../src/cost/calculator.js";
 import { renderReport } from "../src/report/terminal.js";
 import { topTurns } from "../src/turns.js";
+import { stablePricingDate } from "./stable.js";
 
 // Full-pipeline golden-file tests: any change to numbers or layout shows up
 // as a reviewable snapshot diff. (Non-TTY test env → no ANSI codes.)
@@ -27,7 +28,7 @@ describe("golden report snapshots", () => {
         topTurns(session),
         analyzeCache(session),
       );
-      expect(report).toMatchSnapshot();
+      expect(stablePricingDate(report)).toMatchSnapshot();
     });
   }
 });
