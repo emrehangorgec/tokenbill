@@ -5,6 +5,7 @@ import { analyzeCache } from "../src/cost/cache.js";
 import { calculate } from "../src/cost/calculator.js";
 import { renderJson } from "../src/report/json.js";
 import { topTurns } from "../src/turns.js";
+import { stablePricingDate } from "./stable.js";
 
 function pipeline(fixture: string) {
   const session = claudeCodeAdapter.parse(fixture);
@@ -35,6 +36,6 @@ describe("--json output", () => {
   });
 
   it("golden snapshot (subagent session)", () => {
-    expect(pipeline("fixtures/subagent-session.jsonl")).toMatchSnapshot();
+    expect(stablePricingDate(pipeline("fixtures/subagent-session.jsonl"))).toMatchSnapshot();
   });
 });

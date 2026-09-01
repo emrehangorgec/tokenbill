@@ -3,7 +3,7 @@
 exports[`--json output > golden snapshot (subagent session) 1`] = `
 "{
   "schemaVersion": 2,
-  "pricingAsOf": "2026-07-28",
+  "pricingAsOf": "<PRICING_AS_OF>",
   "session": {
     "id": "434bccac-30fc-4b1c-bf3f-477c103af21a",
     "source": "fixtures/subagent-session.jsonl",

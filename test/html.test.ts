@@ -8,6 +8,7 @@ import { analyzeCache } from "../src/cost/cache.js";
 import { calculate } from "../src/cost/calculator.js";
 import { renderAggregateHtml, renderHtml } from "../src/report/html.js";
 import { topTurns } from "../src/turns.js";
+import { stablePricingDate } from "./stable.js";
 
 function singleHtml(fixture: string): string {
   const session = claudeCodeAdapter.parse(fixture);
@@ -79,6 +80,6 @@ describe("html report", () => {
   });
 
   it("golden snapshot (basic session)", () => {
-    expect(singleHtml("fixtures/basic.jsonl")).toMatchSnapshot();
+    expect(stablePricingDate(singleHtml("fixtures/basic.jsonl"))).toMatchSnapshot();
   });
 });
