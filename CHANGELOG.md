@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- `--since` accepts a relative duration (`7d`, `2w`) in addition to an
+  absolute `YYYY-MM-DD` date, counting back from today (UTC), inclusive.
+
 ## [0.7.1] - 2026-10-23
 
 ### Changed

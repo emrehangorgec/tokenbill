@@ -40,7 +40,8 @@ A single .jsonl file gives the full detailed report for just that session.
 Options:
   --all             analyze sessions across every Claude Code project
                     (cannot be combined with a session or project path)
-  --since <date>    include sessions starting on or after YYYY-MM-DD (UTC)
+  --since <date>    include sessions starting on or after YYYY-MM-DD (UTC),
+                    or a relative duration: 7d (last 7 days) or 2w (last 2 weeks)
   --json            machine-readable output
   --html [file]     write a shareable single-file HTML report
                     (default: tokenbill-report.html)
@@ -199,6 +200,26 @@ function applyPricingFile(parsed: unknown): void {
   throw new Error("expected an array of model prices, or { models, serverTools }");
 }
 
+/**
+ * --since takes an absolute YYYY-MM-DD or a relative duration (`7d`, `2w`).
+ * A relative duration resolves to the UTC date `n` units ago, inclusive of
+ * today - `7d` covers today and the previous 6 days. Returns undefined for
+ * anything invalid, including `0d` and malformed suffixes.
+ */
+function resolveSince(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  const relative = /^([1-9]\d*)([dw])$/.exec(raw);
+  if (relative) {
+    const days = Number(relative[1]) * (relative[2] === "w" ? 7 : 1);
+    const now = new Date();
+    const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    return new Date(todayUTC - (days - 1) * 864e5).toISOString().slice(0, 10);
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return undefined;
+  const time = Date.parse(`${raw}T00:00:00.000Z`);
+  return Number.isFinite(time) && new Date(time).toISOString().slice(0, 10) === raw ? raw : undefined;
+}
+
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i];
   if (a === "-h" || a === "--help") {
@@ -209,14 +230,15 @@ for (let i = 0; i < argv.length; i++) {
   } else if (a === "--all") {
     all = true;
   } else if (a === "--since") {
-    const date = argv[++i];
-    const time = date && /^\d{4}-\d{2}-\d{2}$/.test(date)
-      ? Date.parse(`${date}T00:00:00.000Z`) : NaN;
-    if (!Number.isFinite(time) || new Date(time).toISOString().slice(0, 10) !== date) {
-      console.error("--since expects a valid date in YYYY-MM-DD format (UTC)");
+    const raw = argv[++i];
+    const resolved = resolveSince(raw);
+    if (resolved === undefined) {
+      console.error(
+        "--since expects a valid date in YYYY-MM-DD format (UTC), or a relative duration like 7d or 2w",
+      );
       process.exit(1);
     }
-    since = date;
+    since = resolved;
   } else if (a === "--html") {
     html =
       argv[i + 1] && argv[i + 1].endsWith(".html") ? path.resolve(argv[++i]) : path.resolve("tokenbill-report.html");
