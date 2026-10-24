@@ -86,4 +86,67 @@ describe("--since", () => {
     }
     expect(run(home, [project, "--since", "2024-02-29", "--json"]).status).toBe(0);
   });
+
+  it("rejects malformed relative durations", () => {
+    const { home, project } = setup();
+    for (const value of ["7x", "0d", "0w", "-3d", "d", "7", "7dd", "1.5d"]) {
+      const result = run(home, [project, "--since", value]);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("--since expects a valid date");
+    }
+  });
+
+  it("resolves relative durations to today minus n-1 days (UTC), inclusive", () => {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), "tokenbill-since-rel-"));
+    homes.push(home);
+    const project = path.join(home, ".claude", "projects", "project-a");
+    fs.mkdirSync(project, { recursive: true });
+    const content = fs.readFileSync("fixtures/basic.jsonl", "utf8");
+    const todayUTC = Date.UTC(
+      new Date().getUTCFullYear(),
+      new Date().getUTCMonth(),
+      new Date().getUTCDate(),
+    );
+    // "justInside" sits on the boundary day for --since 7d; "justOutside" is one day older.
+    for (const [id, offsetDays] of [["justInside", 6], ["justOutside", 7]] as const) {
+      const timestamp = new Date(todayUTC - offsetDays * 864e5 + 3600e3).toISOString();
+      const records = content.trim().split(/\r?\n/).map((line) => {
+        const record = JSON.parse(line);
+        record.sessionId = id;
+        if (record.timestamp) record.timestamp = timestamp;
+        return JSON.stringify(record);
+      });
+      fs.writeFileSync(path.join(project, `${id}.jsonl`), records.join("\n"));
+    }
+    const result = run(home, [project, "--since", "7d", "--json"]);
+    expect(result.status).toBe(0);
+    const report = JSON.parse(result.stdout);
+    expect(report.sessions.map((s: { sessionId: string }) => s.sessionId)).toEqual(["justInside"]);
+  });
+
+  it("treats 1w as equivalent to 7d", () => {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), "tokenbill-since-week-"));
+    homes.push(home);
+    const project = path.join(home, ".claude", "projects", "project-a");
+    fs.mkdirSync(project, { recursive: true });
+    const content = fs.readFileSync("fixtures/basic.jsonl", "utf8");
+    const todayUTC = Date.UTC(
+      new Date().getUTCFullYear(),
+      new Date().getUTCMonth(),
+      new Date().getUTCDate(),
+    );
+    const timestamp = new Date(todayUTC - 6 * 864e5 + 3600e3).toISOString();
+    const records = content.trim().split(/\r?\n/).map((line) => {
+      const record = JSON.parse(line);
+      record.sessionId = "boundary";
+      if (record.timestamp) record.timestamp = timestamp;
+      return JSON.stringify(record);
+    });
+    fs.writeFileSync(path.join(project, "boundary.jsonl"), records.join("\n"));
+    const daysResult = run(home, [project, "--since", "7d", "--json"]);
+    const weeksResult = run(home, [project, "--since", "1w", "--json"]);
+    expect(daysResult.status).toBe(0);
+    expect(weeksResult.status).toBe(0);
+    expect(JSON.parse(weeksResult.stdout)).toEqual(JSON.parse(daysResult.stdout));
+  });
 }, 60_000);

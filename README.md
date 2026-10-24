@@ -59,7 +59,8 @@ Options:
 
 ```
 --json            machine-readable output (schemaVersion 2)
---since <date>    include sessions starting on or after YYYY-MM-DD (UTC)
+--since <date>    include sessions starting on or after YYYY-MM-DD (UTC),
+                  or a relative duration: 7d (last 7 days) or 2w (last 2 weeks)
 --html [file]     shareable single-file HTML report (default: tokenbill-report.html)
 --md [file]       GitHub Markdown report to stdout or a .md file (PR comments, job summaries)
 --top <n>         number of expensive turns to show (default 10)
@@ -173,6 +174,14 @@ Filter by session start date, including the specified day at midnight UTC:
 ```bash
 npx tokenbill --since 2026-10-01
 npx tokenbill --all --since 2026-10-01 --json
+```
+
+`--since` also accepts a relative duration - `<n>d` or `<n>w` - counting back
+from today (UTC), inclusive:
+
+```bash
+npx tokenbill --since 7d    # today and the previous 6 days
+npx tokenbill --since 2w    # today and the previous 13 days
 ```
 
 This includes each matching session in full, even if it spans multiple days.
