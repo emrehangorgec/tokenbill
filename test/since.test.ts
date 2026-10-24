@@ -89,7 +89,7 @@ describe("--since", () => {
 
   it("rejects malformed relative durations", () => {
     const { home, project } = setup();
-    for (const value of ["7x", "0d", "0w", "-3d", "d", "7", "7dd", "1.5d"]) {
+    for (const value of ["7x", "0d", "0w", "-3d", "d", "7", "7dd", "1.5d", "300000000d", "99999999999w"]) {
       const result = run(home, [project, "--since", value]);
       expect(result.status).toBe(1);
       expect(result.stderr).toContain("--since expects a valid date");

@@ -213,7 +213,9 @@ function resolveSince(raw: string | undefined): string | undefined {
     const days = Number(relative[1]) * (relative[2] === "w" ? 7 : 1);
     const now = new Date();
     const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-    return new Date(todayUTC - (days - 1) * 864e5).toISOString().slice(0, 10);
+    // Durations past JavaScript's date range would throw in toISOString.
+    const start = new Date(todayUTC - (days - 1) * 864e5);
+    return isNaN(start.getTime()) ? undefined : start.toISOString().slice(0, 10);
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return undefined;
   const time = Date.parse(`${raw}T00:00:00.000Z`);
