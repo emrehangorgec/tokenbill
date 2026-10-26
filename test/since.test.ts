@@ -150,3 +150,105 @@ describe("--since", () => {
     expect(JSON.parse(weeksResult.stdout)).toEqual(JSON.parse(daysResult.stdout));
   });
 }, 60_000);
+
+
+describe("--until", () => {
+  it.each([false, true])("includes the final UTC millisecond but not the next day with all=%s", (all) => {
+    const { home, project } = setup();
+    const args = all ? ["--all"] : [project];
+    const result = run(home, [...args, "--until", "2026-09-30", "--json"]);
+    expect(result.status).toBe(0);
+    const report = JSON.parse(result.stdout);
+    expect(report.sessions.map((s: { sessionId: string }) => s.sessionId)).toEqual(["before"]);
+    const single = run(home, [path.join(project, "before.jsonl"), "--until", "2026-09-30", "--json"]);
+    expect(single.status).toBe(0);
+    expect(report.totalUSD).toBeCloseTo(JSON.parse(single.stdout).totalUSD, 6);
+  });
+
+  it("combines both bounds and accepts a single-day window", () => {
+    const { home, project } = setup();
+    const result = run(home, [project, "--since", "2026-10-01", "--until", "2026-10-01", "--json"]);
+    expect(result.status).toBe(0);
+    expect(JSON.parse(result.stdout).sessions.map((s: { sessionId: string }) => s.sessionId))
+      .toEqual(["boundary"]);
+  });
+
+  it("rejects inverted windows in either argument order", () => {
+    const { home, project } = setup();
+    for (const flags of [
+      ["--since", "2026-10-01", "--until", "2026-09-30"],
+      ["--until", "2026-09-30", "--since", "2026-10-01"],
+    ]) {
+      const result = run(home, [project, ...flags, "--json"]);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("--until must be on or after --since");
+      expect(result.stdout).toBe("");
+    }
+  });
+
+  it("reports no matches for projects, single sessions and --all", () => {
+    const { home, project } = setup();
+    for (const args of [[project], [path.join(project, "boundary.jsonl")], ["--all"]]) {
+      const result = run(home, [...args, "--until", "2026-09-01", "--json"]);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("No sessions starting on or before 2026-09-01");
+      expect(result.stdout).toBe("");
+    }
+  });
+
+  it("uses the same date validation as --since", () => {
+    const { home, project } = setup();
+    for (const value of [undefined, "yesterday", "2026-2-01", "2026-02-29", "2026-04-31", "0d", "-3d", "1.5d", "300000000d"]) {
+      const result = run(home, [project, "--until", ...(value ? [value] : [])]);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("--until expects a valid date");
+    }
+  });
+
+  it("resolves relative days and weeks to the end of the same UTC day", () => {
+    const { home, project } = setup();
+    const now = new Date();
+    const day = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - 6 * 864e5;
+    for (const [id, timestamp] of [
+      ["inside", new Date(day + 864e5 - 1).toISOString()],
+      ["outside", new Date(day + 864e5).toISOString()],
+    ]) {
+      const records = fs.readFileSync("fixtures/basic.jsonl", "utf8").trim().split(/\r?\n/)
+        .map(line => {
+          const record = JSON.parse(line);
+          record.sessionId = id;
+          if (record.timestamp) record.timestamp = timestamp;
+          return JSON.stringify(record);
+        });
+      fs.writeFileSync(path.join(project, `${id}.jsonl`), records.join("\n"));
+    }
+    for (const value of ["7d", "1w"]) {
+      const inside = run(home, [path.join(project, "inside.jsonl"), "--until", value, "--json"]);
+      const outside = run(home, [path.join(project, "outside.jsonl"), "--until", value, "--json"]);
+      expect(inside.status).toBe(0);
+      expect(outside.status).toBe(1);
+    }
+  });
+});
+
+it("applies --until before the budget check", () => {
+  const { home, project } = setup();
+  const single = run(home, [path.join(project, "before.jsonl"), "--json"]);
+  const limit = JSON.parse(single.stdout).totalUSD * 1.1;
+  expect(run(home, [project, "--budget", String(limit), "--json"]).status).toBe(2);
+  const filtered = run(home, [project, "--until", "2026-09-30", "--budget", String(limit), "--json"]);
+  expect(filtered.status).toBe(0);
+});
+
+it("ends a card's plan comparison at --until", () => {
+  const { home, project } = setup();
+  const out = path.join(home, "card.svg");
+  const explicit = run(home, ["card", project, "--redact", "--plan", "30",
+    "--since", "2026-09-30", "--until", "2026-09-30", "--out", out]);
+  expect(explicit.status).toBe(0);
+  expect(fs.readFileSync(out, "utf8")).toContain("($1.00)");
+  const defaultWindow = run(home, ["card", project, "--redact", "--plan", "30",
+    "--until", "2026-09-30", "--out", out]);
+  expect(defaultWindow.status).toBe(0);
+  expect(fs.readFileSync(out, "utf8")).toContain("($30.00)");
+});

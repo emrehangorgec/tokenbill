@@ -61,6 +61,8 @@ Options:
 --json            machine-readable output (schemaVersion 2)
 --since <date>    include sessions starting on or after YYYY-MM-DD (UTC),
                   or a relative duration: 7d (last 7 days) or 2w (last 2 weeks)
+--until <date>    include sessions through the end of YYYY-MM-DD (UTC),
+                  or the day resolved from 7d or 2w (same as --since)
 --html [file]     shareable single-file HTML report (default: tokenbill-report.html)
 --md [file]       GitHub Markdown report to stdout or a .md file (PR comments, job summaries)
 --top <n>         number of expensive turns to show (default 10)
@@ -184,6 +186,19 @@ from today (UTC), inclusive:
 npx tokenbill --since 7d    # today and the previous 6 days
 npx tokenbill --since 2w    # today and the previous 13 days
 ```
+
+Use `--until` to include sessions starting through the end of a UTC day:
+
+```bash
+npx tokenbill --since 2026-09-01 --until 2026-09-30  # all of September
+npx tokenbill --all --until 2026-09-30 --json
+```
+
+`--until` accepts the same date forms as `--since`. For example, `--until 7d`
+ends on the UTC day six days before today, including that entire day. An end
+date before `--since` is an error; equal dates select one full day.
+With `card --plan`, the plan fee ends on `--until` too. If `--since` is omitted,
+the default 30-day comparison ends on that day.
 
 This includes each matching session in full, even if it spans multiple days.
 Sessions without a recorded start time are excluded when filtering. If no

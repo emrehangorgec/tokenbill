@@ -42,6 +42,8 @@ Options:
                     (cannot be combined with a session or project path)
   --since <date>    include sessions starting on or after YYYY-MM-DD (UTC),
                     or a relative duration: 7d (last 7 days) or 2w (last 2 weeks)
+  --until <date>    include sessions starting through the end of YYYY-MM-DD (UTC),
+                    or the day resolved from 7d or 2w (same as --since)
   --json            machine-readable output
   --html [file]     write a shareable single-file HTML report
                     (default: tokenbill-report.html)
@@ -56,7 +58,8 @@ Options:
 
 Card options:
   --plan <plan>     pro, max5, max20 or a monthly USD amount: adds the
-                    "N× my plan" figure (last 30 days unless --since is set)
+                    "N× my plan" figure (30 days ending on --until or today,
+                    unless --since is set)
   --out <file>      output path, .png or .svg (default: tokenbill-card.png)
 
 Exit codes: 0 ok, 1 error, 2 budget exceeded.`;
@@ -173,6 +176,7 @@ let top = 10;
 let budget: number | undefined;
 let target: string | undefined;
 let since: string | undefined;
+let until: string | undefined;
 let planArg: string | undefined;
 let cardOut = path.resolve("tokenbill-card.png");
 
@@ -231,16 +235,17 @@ for (let i = 0; i < argv.length; i++) {
     json = true;
   } else if (a === "--all") {
     all = true;
-  } else if (a === "--since") {
+  } else if (a === "--since" || a === "--until") {
     const raw = argv[++i];
     const resolved = resolveSince(raw);
     if (resolved === undefined) {
       console.error(
-        "--since expects a valid date in YYYY-MM-DD format (UTC), or a relative duration like 7d or 2w",
+        `${a} expects a valid date in YYYY-MM-DD format (UTC), or a relative duration like 7d or 2w`,
       );
       process.exit(1);
     }
-    since = resolved;
+    if (a === "--since") since = resolved;
+    else until = resolved;
   } else if (a === "--html") {
     html =
       argv[i + 1] && argv[i + 1].endsWith(".html") ? path.resolve(argv[++i]) : path.resolve("tokenbill-report.html");
@@ -316,8 +321,8 @@ if (card && (json || html || md || budget !== undefined)) {
 }
 
 /**
- * The plan fee over the card's window. Without --since the card covers the
- * last 30 days and compares against one month's fee.
+ * The plan fee over the card's window. Without --since the card covers
+ * 30 days ending on --until (or today), for one month's fee.
  */
 function resolvePlan(): PlanInfo | undefined {
   if (!planArg) return undefined;
@@ -325,12 +330,19 @@ function resolvePlan(): PlanInfo | undefined {
   const monthly = known ? known.monthlyUSD : Number(planArg);
   const name = known ? known.name : `$${monthly}/mo`;
   if (!since || planWindowDefault) return { name, feeUSD: monthly, windowDays: 30 };
-  const days = Math.max(1, Math.ceil((Date.now() - Date.parse(`${since}T00:00:00.000Z`)) / 864e5));
+  const end = until ? Date.parse(`${until}T00:00:00.000Z`) + 864e5 : Date.now();
+  const days = Math.max(1, Math.ceil((end - Date.parse(`${since}T00:00:00.000Z`)) / 864e5));
   return { name, feeUSD: (monthly * days) / 30, windowDays: days };
 }
 const planWindowDefault = card && !!planArg && !since;
 if (planWindowDefault) {
-  since = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+  const end = until ? Date.parse(`${until}T00:00:00.000Z`) + 864e5 : Date.now();
+  since = new Date(end - 30 * 864e5).toISOString().slice(0, 10);
+}
+
+if (since && until && until < since) {
+  console.error("--until must be on or after --since");
+  process.exit(1);
 }
 
 function writeCard(result: ReturnType<typeof aggregate>, project: string): void {
@@ -382,13 +394,22 @@ try {
   const resolved = resolveTarget(target, all);
   // Filter whole sessions by their recorded start, never by file modification time.
   const cutoff = since ? Date.parse(`${since}T00:00:00.000Z`) : undefined;
-  const matchesSince = (session: ReturnType<typeof claudeCodeAdapter.parse>): boolean =>
-    cutoff === undefined || (session.startTime !== undefined && Date.parse(session.startTime) >= cutoff);
-  const noMatches = () => new Error(`No sessions starting on or after ${since} (UTC)`);
+  const end = until ? Date.parse(`${until}T00:00:00.000Z`) + 864e5 : undefined;
+  const matchesWindow = (session: ReturnType<typeof claudeCodeAdapter.parse>): boolean => {
+    if (cutoff === undefined && end === undefined) return true;
+    if (session.startTime === undefined) return false;
+    const start = Date.parse(session.startTime);
+    return Number.isFinite(start) && (cutoff === undefined || start >= cutoff) &&
+      (end === undefined || start < end);
+  };
+  const noMatches = () => new Error(since && until
+    ? `No sessions starting from ${since} through ${until} (UTC)`
+    : until ? `No sessions starting on or before ${until} (UTC)`
+    : `No sessions starting on or after ${since} (UTC)`);
 
   if (resolved.mode === "single") {
     const session = claudeCodeAdapter.parse(resolved.file);
-    if (!matchesSince(session)) throw noMatches();
+    if (!matchesWindow(session)) throw noMatches();
     const cost = calculate(session);
     const attr = attribute(session);
     const turns = topTurns(session, top);
@@ -409,8 +430,8 @@ try {
       );
     }
   } else {
-    const sessions = resolved.files.map((f) => claudeCodeAdapter.parse(f)).filter(matchesSince);
-    if (since && sessions.length === 0) throw noMatches();
+    const sessions = resolved.files.map((f) => claudeCodeAdapter.parse(f)).filter(matchesWindow);
+    if ((since || until) && sessions.length === 0) throw noMatches();
     const result = aggregate(sessions, top);
     const label = all
       ? resolved.label
